@@ -1,2 +1,3 @@
-#Thalia
-On-chain music generation
+# Thalia
+
+On-chain music composition

@@ -28,12 +28,24 @@ interface Notes {
     musicNotes: StepType[];
 }
 
-export const Synthesizer = ({ isPlaying }: { isPlaying: boolean }) => {
+export const Synthesizer = () => {
     const [notes, setNotes] = React.useState<Notes>({ stringNotes: [], musicNotes: [] });
     const [lastNote, setLastNote] = React.useState<NoteType[]>([]);
+    const [resetFullTune, setResetFullTune] = React.useState<boolean>(false);
     //FIXME: left off here
-    const fullTune = useDebounce(notes, 3000);
+    const { fullTune, played } = useDebounce<StepType>(notes.musicNotes, 2000, resetFullTune);
     const [rawMusic, setRawMusic] = React.useState<string>("");
+
+    React.useEffect(() => {
+        if (resetFullTune) {
+            const restart = setTimeout(() => {
+                setResetFullTune(false);
+            }, 3000);
+            return () => {
+                clearTimeout(restart);
+            };
+        }
+    }, [resetFullTune]);
 
     const mapRawMusicToSteps = (rawMusic: string) => {
         const newStringNotes: string[] = [];
@@ -50,10 +62,10 @@ export const Synthesizer = ({ isPlaying }: { isPlaying: boolean }) => {
         }
         setNotes({ stringNotes: newStringNotes, musicNotes: newMusicNotes });
     };
-
     const updateFromRawMusic = (val: string) => {
         setRawMusic(val);
         mapRawMusicToSteps(val);
+        setResetFullTune(true);
     };
 
     const playSingleNote = (val: string) => {
@@ -66,7 +78,7 @@ export const Synthesizer = ({ isPlaying }: { isPlaying: boolean }) => {
             }
         }
     };
-
+    const isPlaying = fullTune.length !== 0 ? true : false;
     return (
         <Container>
             {/* Custom keyboard component  */}
@@ -78,8 +90,17 @@ export const Synthesizer = ({ isPlaying }: { isPlaying: boolean }) => {
                     <Instrument type="synth" notes={lastNote} />
                 </Track>
             </Song>
-            <Song isPlaying={true} bpm={130} volume={3} isMuted={false}>
-                <Track steps={fullTune} volume={0} pan={0} mute={false}>
+            {/* We need to start and stop the song with new steps to ensure the latest one fully loads*/}
+            <Song isPlaying={isPlaying} bpm={160} volume={3} isMuted={false}>
+                <Track
+                    steps={resetFullTune ? [] : notes.musicNotes}
+                    volume={0}
+                    pan={0}
+                    mute={false}
+                    onStepPlay={(step, index) => {
+                        console.log(index, step);
+                    }}
+                >
                     <Instrument type="synth" />
                 </Track>
             </Song>
