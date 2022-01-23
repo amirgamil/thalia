@@ -33,7 +33,6 @@ export const Synthesizer = () => {
     const [lastNote, setLastNote] = React.useState<NoteType[]>([]);
     const [resetFullTune, setResetFullTune] = React.useState<boolean>(false);
     //FIXME: left off here
-    const { fullTune, played } = useDebounce<StepType>(notes.musicNotes, 2000, resetFullTune);
     const [rawMusic, setRawMusic] = React.useState<string>("");
 
     React.useEffect(() => {
@@ -78,7 +77,6 @@ export const Synthesizer = () => {
             }
         }
     };
-    const isPlaying = fullTune.length !== 0 ? true : false;
     return (
         <Container>
             {/* Custom keyboard component  */}
@@ -91,7 +89,7 @@ export const Synthesizer = () => {
                 </Track>
             </Song>
             {/* We need to start and stop the song with new steps to ensure the latest one fully loads*/}
-            <Song isPlaying={isPlaying} bpm={160} volume={3} isMuted={false}>
+            <Song isPlaying={!resetFullTune} bpm={160} volume={3} isMuted={false}>
                 <Track
                     steps={resetFullTune ? [] : notes.musicNotes}
                     volume={0}
