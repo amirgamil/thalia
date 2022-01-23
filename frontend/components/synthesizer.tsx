@@ -3,7 +3,6 @@ import * as React from "react";
 import styled from "styled-components";
 import { Textarea } from "./textarea";
 import { getNoteFromLetter } from "../lib/musicMappings";
-import useDebounce from "../hooks/useDebounce";
 
 //FIXME: not ideal, copied from the reactronic types
 type NoteType = {
