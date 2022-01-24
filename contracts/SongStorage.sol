@@ -1,23 +1,11 @@
+//SPDX-License-Identifier: MIT
 pragma solidity ^0.8.10;
 
+import "./SharedDataStructures.sol";
+import "./test/console.sol";
 
 contract SongStorage {
-    struct Song {
-        string name;
-        //@notice we keep a record of whether a song has been deleted or not
-        //to avoid to having to make an expensive write to remove everything.
-        //Any interaction with this song checks that this is not deleted
-        bool isDeleted;
-        //@notice array of characters that compromise the notes of the song. These
-        //get directly synthesized in the client by mapping them to actual notes.
-        //We uses bytes32 since each character in a song is of a fixed size, and
-        //this is more gas-optimized/cheaper
-        bytes32[] notes;
-        //@notice we use uint32 for struct packing
-        uint32 id;
-        uint32 bpm;
-    }
-    Song[] public songs;
+    SharedDataStructures.Song[] public songs;
     mapping (uint => address) public songToOwner; 
     mapping (address => int) public songOwnerCount; 
 
@@ -25,6 +13,10 @@ contract SongStorage {
     event NewSongCreated (string name, uint id, uint bpm);
     event SongEdited (string name, uint id);
     event SongDeleted(string name, uint id);
+
+    function getAllSongs() view public returns (SharedDataStructures.Song[] memory) {
+        return songs;
+    }
 
     function _getNumberOfSongs() view internal returns (uint32) {
         return uint32(songs.length);
@@ -39,34 +31,37 @@ contract SongStorage {
         _;
     }
 
-    function _createSong(string memory _name, uint bpm) internal {
+    function _createSong(string memory _name, uint bpm) internal returns (uint) {
         uint32 newId = _getNumberOfSongs();
+        //@notice set limit on number of songs a person can create to prevent bots etc.
+        require(songOwnerCount[msg.sender] < 15);
 
-        Song memory newSong;
-
-        newSong.name = _name;
-        newSong.isDeleted = false;
-        newSong.id = newId;
-        newSong.bpm = uint32(bpm);
-
-        songs.push(newSong);
+        songs.push(SharedDataStructures.Song({name: _name, isDeleted: false, notes: new bytes32[](0), id: newId, bpm: uint32(bpm)}));
 
         songToOwner[newId] = msg.sender;
         //@notice we don't need to check if this exists due to Solidity's design of mappings
         songOwnerCount[msg.sender]++;
 
         emit NewSongCreated(_name, newId, bpm);
+
+        return newId; 
     }  
 
-    //TODO: not sure about payable here
-    function createNewSong(string memory _name, uint bpm) public payable {
-        _createSong(_name, bpm);
+    //@notice returns the id of the newly created song
+    function createNewSong(string memory _name, uint bpm) public returns (uint) {
+        return _createSong(_name, bpm);
     }
 
     function _addNotesToSong(uint id, bytes32[] memory newNotes) internal {
         //@notice ensure we're adding to a song that actually exists
         require(id < songs.length);
-        Song storage currentSong = songs[id];
+        //@notice for now, can only append 15 new notes at a time
+        require(newNotes.length < 15);
+
+        SharedDataStructures.Song storage currentSong = songs[id];
+
+        require(!currentSong.isDeleted);
+
         for (uint i=0; i < newNotes.length; i++) {
             currentSong.notes.push(newNotes[i]);
         }
@@ -81,8 +76,13 @@ contract SongStorage {
 
     function deleteSong(uint id) onlySongOwner(id) public {
         require(id < songs.length);
+        require(!songs[id].isDeleted);
 
         songs[id].isDeleted = true;
+        //@notice we delete the most expensive part of storing a song and bpm
+        //which will no longer be used
+        delete songs[id].notes;
+        delete songs[id].bpm;
 
         emit SongDeleted(songs[id].name, id);
     }
