@@ -20,7 +20,6 @@ interface Hevm {
 
 contract ContractTest is DSTest {
     SongStorage songStorage;
-    //FIXME: actual address here?
     Hevm hevm = Hevm(HEVM_ADDRESS);
 
     function setUp() public {
@@ -153,6 +152,7 @@ contract ContractTest is DSTest {
     function testFailInvalidSongDeletion()  public {
         uint currId = songStorage.createNewSong("will be deleted", 90);
 
+        //some random address
         address addr = 0xc0ffee254729296a45a3885639AC7E10F9d54979;
         //simulate a different msg.sender address with prank
         hevm.prank(addr);

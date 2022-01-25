@@ -2,8 +2,9 @@ import type { NextPage } from "next";
 import Head from "next/head";
 import Image from "next/image";
 import { Playground } from "../components/playground";
-import { Provider } from "wagmi";
 import styles from "../styles/Home.module.css";
+import { Wallet } from "../components/wallet";
+import { Nav } from "../components/nav";
 
 const Home: NextPage = () => {
     return (
@@ -14,12 +15,12 @@ const Home: NextPage = () => {
                 <link rel="icon" href="/favicon.ico" />
             </Head>
 
+            <Nav />
             <main className={styles.main}>
                 <h1 className="text-xl">Thalia</h1>
-                <p>On-chain music composition. Compose with the masses. Build beautiful tunes together.</p>
-                <Provider>
-                    <Playground />
-                </Provider>
+                <p>On-chain music composition. Build tunes with anyone. Oh and it's all on-chain.</p>
+                <Wallet />
+                <Playground />
             </main>
         </div>
     );
