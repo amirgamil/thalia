@@ -33,7 +33,7 @@ export const AppContextProvider = (props: any) => {
             },
         };
         const web3Modal = new Web3Modal({
-            network: "", // optional
+            network: "mainnet", // optional
             cacheProvider: false, // optional
             providerOptions, // required
         });
@@ -44,6 +44,7 @@ export const AppContextProvider = (props: any) => {
         setSigner(signer);
 
         const address = await signer.getAddress();
+        console.log("address: ", address, " signer: ", signer);
         setAddress(address);
     };
 

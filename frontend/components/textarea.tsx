@@ -20,8 +20,10 @@ const Container = styled.div`
         border-top-left-radius: 7px;
         border-top-right-radius: 7px;
         -webkit-appearance: none;
-        box-shadow: 0 0 4px 1px rgba(0, 0, 0, 0.2);
-        outline: 0;
+        border: none;
+        outline: none;
+        color: white;
+        background: transparent;
         font-family: "Inconsolata", monospace;
         word-wrap: break-word;
         white-space: pre-wrap;
@@ -46,6 +48,7 @@ export const Textarea: React.FC<Props> = ({ value, setValue, setIndividualNote }
     return (
         <Container className="w-full relative">
             <textarea
+                placeholder="Start typing to build a tune"
                 value={value}
                 onKeyDown={(evt) => setIndividualNote(evt.key)}
                 onKeyUp={() => setIndividualNote("")}

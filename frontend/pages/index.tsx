@@ -18,8 +18,10 @@ const Home: NextPage = () => {
             <Nav />
             <main className={styles.main}>
                 <h1 className="text-xl">Thalia</h1>
-                <p>On-chain music composition. Build tunes with anyone. Oh and it's all on-chain.</p>
-                <Wallet />
+                <p>
+                    On-chain music composition. Build tunes with anyone and everyone straight from your keyboard. Oh and
+                    did I mention it's all on-chain?
+                </p>
                 <Playground />
             </main>
         </div>
