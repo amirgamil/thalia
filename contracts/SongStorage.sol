@@ -12,12 +12,17 @@ contract SongStorage {
     event NewSongCreated (string name, uint id, uint bpm);
     event SongEdited (string name, uint id);
     event SongDeleted(string name, uint id);
+    event SongMinted(string name, uint id);
 
     function getAllSongs() view public returns (SharedDataStructures.Song[] memory) {
         return songs;
     }
 
-    function _getNumberOfSongs() view internal returns (uint32) {
+    function getSongFromId(uint id) view public returns (SharedDataStructures.Song memory) {
+        return songs[id];
+    }
+
+    function getNumberOfSongs() view public returns (uint32) {
         return uint32(songs.length);
     }
 
@@ -25,17 +30,21 @@ contract SongStorage {
         return songToOwner[id];
     }
 
+    function double(uint num) pure public returns (uint) {
+        return num * 2;
+    }
+    
     modifier onlySongOwner(uint id) {
         require(msg.sender == _getSongOwner(id));
         _;
     }
 
     function _createSong(string memory _name, uint bpm) internal returns (uint) {
-        uint32 newId = _getNumberOfSongs();
+        uint32 newId = getNumberOfSongs();
         //@notice set limit on number of songs a person can create to prevent bots etc.
         require(songOwnerCount[msg.sender] < 15);
 
-        songs.push(SharedDataStructures.Song({name: _name, isDeleted: false, notes: new bytes32[](0), id: newId, bpm: uint32(bpm)}));
+        songs.push(SharedDataStructures.Song({name: _name, isMinted: false, isDeleted: false, notes: new bytes32[](0), id: newId, bpm: uint32(bpm)}));
 
         songToOwner[newId] = msg.sender;
         //@notice we don't need to check if this exists due to Solidity's design of mappings
@@ -60,6 +69,7 @@ contract SongStorage {
         SharedDataStructures.Song storage currentSong = songs[id];
 
         require(!currentSong.isDeleted);
+        require(!currentSong.isMinted);
 
         for (uint i=0; i < newNotes.length; i++) {
             currentSong.notes.push(newNotes[i]);
@@ -69,7 +79,7 @@ contract SongStorage {
 
     }
 
-    function addNotes(uint id, bytes32[] memory newNotes) public payable {
+    function addNotes(uint id, bytes32[] memory newNotes) public {
         _addNotesToSong(id, newNotes);
     }
 
@@ -86,5 +96,14 @@ contract SongStorage {
         emit SongDeleted(songs[id].name, id);
     }
 
+    function mintSong(uint id) public {
+        require(id < songs.length);
+        require(!songs[id].isDeleted);
+
+        songs[id].isMinted = true;
+
+        emit SongMinted(songs[id].name, id);
+
+    }
 
 }

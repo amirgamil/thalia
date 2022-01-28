@@ -4,6 +4,9 @@ pragma solidity ^0.8.10;
 library SharedDataStructures {
     struct Song {
         string name;
+        //@notice, a song that has been minted into an NFT and stored on the Permaweb
+        //can no longer be added to it.
+        bool isMinted;
         //@notice we keep a record of whether a song has been deleted or not
         //to avoid to having to make an expensive write to adjust ids of existing songs.
         //Instead, we set this boolean variable and delete notes.

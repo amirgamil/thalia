@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.10;
 
-import "../../lib/ds-test/src/test.sol";
-import "../SongStorage.sol";
+import "../lib/ds-test/src/test.sol";
+import "../contracts/SongStorage.sol";
 import "./console.sol";
 
 interface Hevm {
@@ -159,5 +159,17 @@ contract ContractTest is DSTest {
 
         songStorage.deleteSong(currId);
 
+    }
+
+    function testFailAddToSongAfterMint() public {
+        uint currId = songStorage.createNewSong("will be deleted", 90);
+        songStorage.mintSong(currId);
+
+        bytes32[] memory moreNewNotes = new bytes32[](3);
+        moreNewNotes[0] = bytes32("!");
+        moreNewNotes[1] = bytes32("A");
+        moreNewNotes[2] = bytes32("B");
+
+        songStorage.addNotes(currId, moreNewNotes);
     }
 }

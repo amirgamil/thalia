@@ -27,7 +27,7 @@ export const AppContextProvider = (props: any) => {
                 package: WalletConnectProvider,
                 options: {
                     rpc: {
-                        1: "https://polygon-mumbai.g.alchemy.com/v2/2R-2HEUpjxVwsi_yS5GEC4kIYTgPc9mw",
+                        1: `https://polygon-mumbai.g.alchemy.com/v2/${process.env.ALCHEMY_API_KEY}`,
                     },
                 },
             },

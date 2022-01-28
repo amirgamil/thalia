@@ -4,4 +4,6 @@ cache/
 *.env.test
 build
 node_modules
+cache/
+artifacts/
 *.DS_Store
