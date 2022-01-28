@@ -13,7 +13,7 @@ const Container = styled.div`
         box-sizing: border-box;
         width: 100%;
         border: 0px;
-        padding: 10px 15px 10px 15px;
+        padding: 10px 15px 10px 0;
         min-height: 3.5em;
         line-height: 1.5em;
         margin: 0;
@@ -22,7 +22,7 @@ const Container = styled.div`
         -webkit-appearance: none;
         border: none;
         outline: none;
-        color: white;
+        color: black;
         background: transparent;
         font-family: "Inconsolata", monospace;
         word-wrap: break-word;
@@ -46,8 +46,9 @@ const Container = styled.div`
 
 export const Textarea: React.FC<Props> = ({ value, setValue, setIndividualNote }) => {
     return (
-        <Container className="w-full relative">
+        <Container className="w-full relative my-4">
             <textarea
+                className="text-s"
                 placeholder="Start typing to build a tune"
                 value={value}
                 onKeyDown={(evt) => setIndividualNote(evt.key)}

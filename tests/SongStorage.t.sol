@@ -3,7 +3,6 @@ pragma solidity ^0.8.10;
 
 import "../lib/ds-test/src/test.sol";
 import "../contracts/SongStorage.sol";
-import "./console.sol";
 
 interface Hevm {
     // Sets the *next* call's msg.sender to be the input address

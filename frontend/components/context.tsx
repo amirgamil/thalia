@@ -2,25 +2,35 @@ import * as React from "react";
 import Web3Modal from "web3modal";
 import { providers, Signer } from "ethers";
 import WalletConnectProvider from "@walletconnect/web3-provider";
+import { ethers } from "ethers";
+import { songStorageABI } from "../abi/songStorage";
 
 interface Context {
     openModal: () => void;
     signOut: () => void;
     attemptLogin: () => void;
     signer?: providers.JsonRpcSigner;
+    provider?: providers.Web3Provider;
+    contract?: ethers.Contract;
     address?: string;
 }
+
 export const AppContext = React.createContext<Context>({
     openModal: () => {},
     signOut: () => {},
     attemptLogin: () => {},
     signer: undefined,
+    provider: undefined,
+    contract: undefined,
     address: "",
 });
 
 export const AppContextProvider = (props: any) => {
     const [signer, setSigner] = React.useState<providers.JsonRpcSigner | undefined>(undefined);
+    const [provider, setProvider] = React.useState<providers.Web3Provider | undefined>(undefined);
     const [address, setAddress] = React.useState<string | undefined>(undefined);
+    const [contract, setContract] = React.useState<ethers.Contract | undefined>(undefined);
+
     const openModal = async () => {
         const providerOptions = {
             walletconnect: {
@@ -38,13 +48,16 @@ export const AppContextProvider = (props: any) => {
             providerOptions, // required
         });
         web3Modal.clearCachedProvider();
-        const provider = new providers.Web3Provider(await web3Modal.connect());
-        const signer = provider.getSigner();
+        const provider = new ethers.providers.Web3Provider(await web3Modal.connect());
+        setProvider(provider);
 
+        const songStorageContract = new ethers.Contract(process.env.CONTRACT_ADDRESS ?? "", songStorageABI, provider);
+        setContract(songStorageContract);
+
+        const signer = provider.getSigner();
         setSigner(signer);
 
         const address = await signer.getAddress();
-        console.log("address: ", address, " signer: ", signer);
         setAddress(address);
     };
 
@@ -80,6 +93,7 @@ export const AppContextProvider = (props: any) => {
                 attemptLogin,
                 signer,
                 address,
+                provider,
             }}
         >
             <>{props.children}</>

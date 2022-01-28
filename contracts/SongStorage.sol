@@ -30,10 +30,6 @@ contract SongStorage {
         return songToOwner[id];
     }
 
-    function double(uint num) pure public returns (uint) {
-        return num * 2;
-    }
-    
     modifier onlySongOwner(uint id) {
         require(msg.sender == _getSongOwner(id));
         _;

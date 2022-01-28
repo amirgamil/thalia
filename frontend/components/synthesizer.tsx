@@ -27,11 +27,10 @@ interface Notes {
     musicNotes: StepType[];
 }
 
-export const Synthesizer = () => {
+export const Synthesizer: React.FC<{ bpm: number }> = ({ bpm }: { bpm: number }) => {
     const [notes, setNotes] = React.useState<Notes>({ stringNotes: [], musicNotes: [] });
     const [lastNote, setLastNote] = React.useState<NoteType[]>([]);
     const [resetFullTune, setResetFullTune] = React.useState<boolean>(false);
-    //FIXME: left off here
     const [rawMusic, setRawMusic] = React.useState<string>("");
 
     React.useEffect(() => {
@@ -80,15 +79,15 @@ export const Synthesizer = () => {
         <Container>
             {/* Custom keyboard component  */}
             {/* <Keyboard onMouseDown={(notes) => setNotes(notes)} onMouseUp={() => setNotes([])} /> */}
-            <NotesDisplay notes={notes.stringNotes} />
             <Textarea setIndividualNote={playSingleNote} value={rawMusic} setValue={updateFromRawMusic} />
+            <NotesDisplay notes={notes.stringNotes} />
             <Song>
                 <Track>
                     <Instrument type="synth" notes={lastNote} />
                 </Track>
             </Song>
             {/* We need to start and stop the song with new steps to ensure the latest one fully loads*/}
-            <Song isPlaying={!resetFullTune} bpm={160} volume={3} isMuted={false}>
+            <Song isPlaying={!resetFullTune} bpm={bpm} volume={3} isMuted={false}>
                 <Track
                     steps={resetFullTune ? [] : notes.musicNotes}
                     volume={0}
