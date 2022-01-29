@@ -43,6 +43,19 @@ contract ContractTest is DSTest {
         assertEq(allSongs[0].name, "new song");
     }
 
+    function testSongCreationWithNotes() public {
+        bytes32[] memory newNotes = new bytes32[](3);
+        newNotes[0] = bytes32("!");
+        newNotes[1] = bytes32("A");
+        newNotes[2] = bytes32("B");
+        songStorage.createNewSongWithNotes("new song", 120, newNotes);
+
+        SharedDataStructures.Song[] memory allSongs = songStorage.getAllSongs();
+        assertTrue(allSongs.length == 1);
+        assertEq(allSongs[0].name, "new song");
+        assertEq(allSongs[0].notes, newNotes);
+    }
+
     function testValidAddingToSong()  public {
         songStorage.createNewSong("new song", 120);
         bytes32[] memory newNotes = new bytes32[](3);
@@ -75,6 +88,10 @@ contract ContractTest is DSTest {
         expected[6] = bytes32("I");
 
         assertEq(newSongs[0].notes, expected);
+    }
+
+    function testFailSongOutOfBounds() view public {
+        songStorage.getSongFromId(0);
     }
     
     function testFailAddToEmptySong()  public {

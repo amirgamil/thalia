@@ -12,13 +12,14 @@ const Container = styled.div`
 
 interface Props {
     onClick: (evt: React.MouseEvent<HTMLButtonElement>) => void;
+    children: React.ReactNode;
 }
 
-export const Button: React.FC<Props> = ({ onClick }: Props) => {
+export const Button: React.FC<Props> = ({ onClick, children }: Props) => {
     return (
         <Container className="my-10 w-full flex justify-center">
             <button onClick={onClick} className="border p-3">
-                Create
+                {children}
             </button>
         </Container>
     );

@@ -18,8 +18,12 @@ contract SongStorage {
         return songs;
     }
 
-    function getSongFromId(uint id) view public returns (SharedDataStructures.Song memory) {
-        return songs[id];
+    function getSongFromId(uint id) view public returns (string memory, bool, bool, bytes32[] memory, uint32, uint32) {
+        require(id < songs.length);
+
+        SharedDataStructures.Song memory currSong = songs[id];
+
+        return (currSong.name, currSong.isMinted, currSong.isDeleted, currSong.notes, currSong.id, currSong.bpm);
     }
 
     function getNumberOfSongs() view public returns (uint32) {
@@ -54,6 +58,17 @@ contract SongStorage {
     //@notice returns the id of the newly created song
     function createNewSong(string memory _name, uint bpm) public returns (uint) {
         return _createSong(_name, bpm);
+    }
+    
+    //@notice creates a new song like above, but also adds notes to the songs. This is done to optimize gas
+    //as opposed to calling createSong and then addNotes
+    function createNewSongWithNotes(string memory _name, uint bpm, bytes32[] memory newNotes) public returns (uint) {
+        uint id = _createSong(_name, bpm);
+
+        SharedDataStructures.Song storage newSong = songs[id];
+        newSong.notes = newNotes;
+
+        return id;
     }
 
     function _addNotesToSong(uint id, bytes32[] memory newNotes) internal {

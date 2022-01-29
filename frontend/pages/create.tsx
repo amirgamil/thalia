@@ -13,10 +13,12 @@ import { useAppContext } from "../components/context";
 const Create: NextPage = () => {
     const [name, setName] = React.useState<string>("");
     const [bpm, setBpm] = React.useState<string>("");
+    const [rawSongNotes, setRawSongNotes] = React.useState<string>("");
     const context = useAppContext();
 
-    const callback = (notes: string[]) => {
+    const updateSongCallback = (notes: string) => {
         //callback passed into the Playground to get the music notes
+        setRawSongNotes(notes);
     };
 
     const createNewSong = async () => {
@@ -24,8 +26,19 @@ const Create: NextPage = () => {
         const signer = context.signer;
         const contract = context.contract;
         if (provider && signer && contract) {
-            //TODO: left off here, test it works!
-            await contract.createNewSong(name, bpm);
+            const contractWithSigner = contract.connect(signer);
+
+            let res;
+
+            if (rawSongNotes.length !== 0) {
+                res = await contractWithSigner.createSongWithNotes(name, bpm, rawSongNotes.split(""));
+            } else {
+                res = await contractWithSigner.createNewSong(name, bpm);
+            }
+
+            console.log("executed create new song: ", res);
+        } else {
+            console.error("Could not verify provider or signer or contract");
         }
     };
 
@@ -61,7 +74,7 @@ const Create: NextPage = () => {
                         onChange={(evt) => setBpm(evt.target.value)}
                     />
                 </div>
-                <Playground bpm={numericBpm} />
+                <Playground rawNotes={rawSongNotes} updateSongCallback={updateSongCallback} bpm={numericBpm} />
                 <Button onClick={createNewSong}>Create</Button>
                 <Footer />
             </main>

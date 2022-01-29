@@ -1,10 +1,16 @@
 import * as React from "react";
 import { Synthesizer } from "./synthesizer";
 
-export const Playground: React.FC<{ bpm: number }> = ({ bpm }: { bpm: number }) => {
+interface Props {
+    bpm: number;
+    rawNotes: string;
+    updateSongCallback: (newNotes: string[]) => void;
+}
+
+export const Playground: React.FC<Props> = ({ bpm, updateSongCallback, rawNotes }: Props) => {
     return (
         <div className="rounded-md w-full h-full">
-            <Synthesizer bpm={bpm} />
+            <Synthesizer rawNotes={rawNotes} updateSongCallback={updateSongCallback} bpm={bpm} />
         </div>
     );
 };

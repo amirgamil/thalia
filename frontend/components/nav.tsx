@@ -44,7 +44,7 @@ export const Nav = () => {
                                 if (context.address) {
                                     goHome();
                                 } else {
-                                    context.openModal();
+                                    context.loadWeb3Modal();
                                 }
                             }}
                         >

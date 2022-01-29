@@ -27,11 +27,17 @@ interface Notes {
     musicNotes: StepType[];
 }
 
-export const Synthesizer: React.FC<{ bpm: number }> = ({ bpm }: { bpm: number }) => {
+interface Props {
+    bpm: number;
+    rawNotes: string;
+    updateSongCallback: (newNotes: string[]) => void;
+}
+
+export const Synthesizer: React.FC<Props> = ({ bpm, updateSongCallback, rawNotes }: Props) => {
     const [notes, setNotes] = React.useState<Notes>({ stringNotes: [], musicNotes: [] });
     const [lastNote, setLastNote] = React.useState<NoteType[]>([]);
     const [resetFullTune, setResetFullTune] = React.useState<boolean>(false);
-    const [rawMusic, setRawMusic] = React.useState<string>("");
+    const [rawMusic, setRawMusic] = React.useState<string>(rawNotes);
 
     React.useEffect(() => {
         if (resetFullTune) {
@@ -47,6 +53,8 @@ export const Synthesizer: React.FC<{ bpm: number }> = ({ bpm }: { bpm: number })
     const mapRawMusicToSteps = (rawMusic: string) => {
         const newStringNotes: string[] = [];
         const newMusicNotes: StepType[] = [];
+        updateSongCallback(rawMusic.split(""));
+
         for (let i = 0; i < rawMusic.length; i++) {
             const note = getNoteFromLetter(rawMusic.charAt(i));
             if (note === null) {
@@ -70,6 +78,7 @@ export const Synthesizer: React.FC<{ bpm: number }> = ({ bpm }: { bpm: number })
             setLastNote([]);
         } else {
             const note = getNoteFromLetter(val);
+
             if (note) {
                 setLastNote([{ name: note }]);
             }
@@ -77,8 +86,6 @@ export const Synthesizer: React.FC<{ bpm: number }> = ({ bpm }: { bpm: number })
     };
     return (
         <Container>
-            {/* Custom keyboard component  */}
-            {/* <Keyboard onMouseDown={(notes) => setNotes(notes)} onMouseUp={() => setNotes([])} /> */}
             <Textarea setIndividualNote={playSingleNote} value={rawMusic} setValue={updateFromRawMusic} />
             <NotesDisplay notes={notes.stringNotes} />
             <Song>
@@ -88,15 +95,7 @@ export const Synthesizer: React.FC<{ bpm: number }> = ({ bpm }: { bpm: number })
             </Song>
             {/* We need to start and stop the song with new steps to ensure the latest one fully loads*/}
             <Song isPlaying={!resetFullTune} bpm={bpm} volume={3} isMuted={false}>
-                <Track
-                    steps={resetFullTune ? [] : notes.musicNotes}
-                    volume={0}
-                    pan={0}
-                    mute={false}
-                    onStepPlay={(step, index) => {
-                        console.log(index, step);
-                    }}
-                >
+                <Track steps={resetFullTune ? [] : notes.musicNotes} volume={0} pan={0} mute={false}>
                     <Instrument type="synth" />
                 </Track>
             </Song>

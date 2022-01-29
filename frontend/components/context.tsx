@@ -1,14 +1,13 @@
 import * as React from "react";
-import Web3Modal from "web3modal";
 import { providers, Signer } from "ethers";
-import WalletConnectProvider from "@walletconnect/web3-provider";
 import { ethers } from "ethers";
 import { songStorageABI } from "../abi/songStorage";
+import Web3Modal from "web3modal";
+import WalletConnectProvider from "@walletconnect/web3-provider";
 
 interface Context {
-    openModal: () => void;
+    loadWeb3Modal: () => void;
     signOut: () => void;
-    attemptLogin: () => void;
     signer?: providers.JsonRpcSigner;
     provider?: providers.Web3Provider;
     contract?: ethers.Contract;
@@ -16,23 +15,20 @@ interface Context {
 }
 
 export const AppContext = React.createContext<Context>({
-    openModal: () => {},
+    loadWeb3Modal: () => {},
     signOut: () => {},
-    attemptLogin: () => {},
     signer: undefined,
     provider: undefined,
     contract: undefined,
     address: "",
 });
 
-export const AppContextProvider = (props: any) => {
-    const [signer, setSigner] = React.useState<providers.JsonRpcSigner | undefined>(undefined);
-    const [provider, setProvider] = React.useState<providers.Web3Provider | undefined>(undefined);
-    const [address, setAddress] = React.useState<string | undefined>(undefined);
-    const [contract, setContract] = React.useState<ethers.Contract | undefined>(undefined);
-
-    const openModal = async () => {
-        const providerOptions = {
+let web3Modal: Web3Modal;
+if (typeof window !== "undefined") {
+    web3Modal = new Web3Modal({
+        network: "31337", // change after deploy
+        cacheProvider: true, // optional
+        providerOptions: {
             walletconnect: {
                 package: WalletConnectProvider,
                 options: {
@@ -41,17 +37,23 @@ export const AppContextProvider = (props: any) => {
                     },
                 },
             },
-        };
-        const web3Modal = new Web3Modal({
-            network: "mainnet", // optional
-            cacheProvider: false, // optional
-            providerOptions, // required
-        });
-        web3Modal.clearCachedProvider();
-        const provider = new ethers.providers.Web3Provider(await web3Modal.connect());
+        },
+    });
+}
+
+export const AppContextProvider = (props: any) => {
+    const [signer, setSigner] = React.useState<providers.JsonRpcSigner | undefined>(undefined);
+    const [provider, setProvider] = React.useState<providers.Web3Provider | undefined>(undefined);
+    const [address, setAddress] = React.useState<string | undefined>(undefined);
+    const [contract, setContract] = React.useState<ethers.Contract | undefined>(undefined);
+
+    const deployedContractAddress = React.useMemo(() => "0x5FbDB2315678afecb367f032d93F642f64180aa3", []);
+
+    const loadWeb3Modal = React.useCallback(async () => {
+        const provider = new ethers.providers.Web3Provider(await web3Modal.connect(), "any");
         setProvider(provider);
 
-        const songStorageContract = new ethers.Contract(process.env.CONTRACT_ADDRESS ?? "", songStorageABI, provider);
+        const songStorageContract = new ethers.Contract(deployedContractAddress ?? "", songStorageABI, provider);
         setContract(songStorageContract);
 
         const signer = provider.getSigner();
@@ -59,40 +61,28 @@ export const AppContextProvider = (props: any) => {
 
         const address = await signer.getAddress();
         setAddress(address);
-    };
+    }, [setProvider]);
+
+    React.useEffect(() => {
+        if (web3Modal.cachedProvider) {
+            loadWeb3Modal();
+        }
+    }, [loadWeb3Modal]);
 
     const signOut = () => {
+        web3Modal.clearCachedProvider();
         setSigner(undefined);
         setAddress(undefined);
-        if (window && window.localStorage) {
-            window.localStorage.setItem("WEB3_CONNECT_CACHED_PROVIDER", "");
-        }
-    };
-
-    const attemptLogin = async () => {
-        /* if (
-      window &&
-      window.localStorage &&
-      window.localStorage.getItem("WEB3_CONNECT_CACHED_PROVIDER") &&
-      typeof window.ethereum !== "undefined"
-    ) {
-      const provider = window.ethereum;
-      const addresses = await provider.request({
-        method: "eth_requestAccounts",
-      });
-      setSigner(provider);
-      setAddress(addresses[0]);
-    } */
     };
 
     return (
         <AppContext.Provider
             value={{
-                openModal,
+                loadWeb3Modal,
                 signOut,
-                attemptLogin,
                 signer,
                 address,
+                contract,
                 provider,
             }}
         >
