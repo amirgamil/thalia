@@ -5,8 +5,15 @@ import { Playground } from "../components/playground";
 import styles from "../styles/Home.module.css";
 import { Nav } from "../components/nav";
 import { Footer } from "../components/footer";
+import { Button } from "../components/button";
 
 const Home: NextPage = () => {
+    const [rawNotes, setRawNotes] = React.useState<string>("");
+
+    const updateSongCallback = (newNotes: string) => {
+        setRawNotes(newNotes);
+    };
+
     return (
         <div className={styles.container}>
             <Head>
@@ -25,7 +32,8 @@ const Home: NextPage = () => {
                     <strong>On-chain music composition</strong>.<br></br>Compose tunes with anyone and everyone{" "}
                     <strong>straight from your keyboard</strong>.
                 </p>
-                <Playground bpm={140} />
+                <Playground prevMusicNotes={""} updateSongCallback={updateSongCallback} rawNotes={rawNotes} bpm={140} />
+                <Button onClick={(evt) => console.log("TODO")}>Make this song!</Button>
                 <Footer />
             </main>
         </div>

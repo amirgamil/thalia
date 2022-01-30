@@ -74,7 +74,12 @@ const Create: NextPage = () => {
                         onChange={(evt) => setBpm(evt.target.value)}
                     />
                 </div>
-                <Playground rawNotes={rawSongNotes} updateSongCallback={updateSongCallback} bpm={numericBpm} />
+                <Playground
+                    prevMusicNotes={""}
+                    rawNotes={rawSongNotes}
+                    updateSongCallback={updateSongCallback}
+                    bpm={numericBpm}
+                />
                 <Button onClick={createNewSong}>Create</Button>
                 <Footer />
             </main>

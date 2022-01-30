@@ -3,6 +3,7 @@ import * as React from "react";
 import styled from "styled-components";
 import { Textarea } from "./textarea";
 import { getNoteFromLetter } from "../lib/musicMappings";
+import { mapRawMusicToSteps, Notes } from "../lib/musicHelpers";
 
 //FIXME: not ideal, copied from the reactronic types
 type NoteType = {
@@ -22,19 +23,15 @@ const Container = styled.div`
     width: 100%;
 `;
 
-interface Notes {
-    stringNotes: string[];
-    musicNotes: StepType[];
-}
-
 interface Props {
     bpm: number;
     rawNotes: string;
-    updateSongCallback: (newNotes: string[]) => void;
+    updateSongCallback: (newNotes: string) => void;
+    prevMusicNotes: string;
 }
 
-export const Synthesizer: React.FC<Props> = ({ bpm, updateSongCallback, rawNotes }: Props) => {
-    const [notes, setNotes] = React.useState<Notes>({ stringNotes: [], musicNotes: [] });
+export const Synthesizer: React.FC<Props> = ({ bpm, updateSongCallback, rawNotes, prevMusicNotes }: Props) => {
+    const [notes, setNotes] = React.useState<Notes>(mapRawMusicToSteps(rawNotes));
     const [lastNote, setLastNote] = React.useState<NoteType[]>([]);
     const [resetFullTune, setResetFullTune] = React.useState<boolean>(false);
     const [rawMusic, setRawMusic] = React.useState<string>(rawNotes);
@@ -50,26 +47,14 @@ export const Synthesizer: React.FC<Props> = ({ bpm, updateSongCallback, rawNotes
         }
     }, [resetFullTune]);
 
-    const mapRawMusicToSteps = (rawMusic: string) => {
-        const newStringNotes: string[] = [];
-        const newMusicNotes: StepType[] = [];
-        updateSongCallback(rawMusic.split(""));
-
-        for (let i = 0; i < rawMusic.length; i++) {
-            const note = getNoteFromLetter(rawMusic.charAt(i));
-            if (note === null) {
-                newStringNotes.push(" _ ");
-                newMusicNotes.push(note);
-            } else if (note) {
-                newStringNotes.push(note);
-                newMusicNotes.push(note as MidiNote);
-            }
-        }
-        setNotes({ stringNotes: newStringNotes, musicNotes: newMusicNotes });
+    const convertMusicToSteps = (rawMusic: string) => {
+        updateSongCallback(rawMusic);
+        setNotes(mapRawMusicToSteps(rawMusic));
     };
+
     const updateFromRawMusic = (val: string) => {
         setRawMusic(val);
-        mapRawMusicToSteps(val);
+        convertMusicToSteps(val);
         setResetFullTune(true);
     };
 
@@ -86,15 +71,20 @@ export const Synthesizer: React.FC<Props> = ({ bpm, updateSongCallback, rawNotes
     };
     return (
         <Container>
-            <Textarea setIndividualNote={playSingleNote} value={rawMusic} setValue={updateFromRawMusic} />
+            <Textarea
+                uneditableText={prevMusicNotes}
+                setIndividualNote={playSingleNote}
+                value={rawMusic}
+                setValue={updateFromRawMusic}
+            />
             <NotesDisplay notes={notes.stringNotes} />
             <Song>
                 <Track>
                     <Instrument type="synth" notes={lastNote} />
                 </Track>
             </Song>
-            {/* We need to start and stop the song with new steps to ensure the latest one fully loads*/}
-            <Song isPlaying={!resetFullTune} bpm={bpm} volume={3} isMuted={false}>
+            {/* Unmute */}
+            <Song isPlaying={!resetFullTune} bpm={bpm} volume={3} isMuted={true}>
                 <Track steps={resetFullTune ? [] : notes.musicNotes} volume={0} pan={0} mute={false}>
                     <Instrument type="synth" />
                 </Track>

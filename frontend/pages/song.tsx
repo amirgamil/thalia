@@ -8,14 +8,16 @@ import { Footer } from "../components/footer";
 import { Button } from "../components/button";
 import { useAppContext } from "../components/context";
 import { useQuery } from "react-query";
-import axios from "axios";
 import { useRouter } from "next/router";
+import toast, { Toaster } from "react-hot-toast";
+import { createByteArrFromString, getStringFromByteArray } from "../lib/uintHelpers";
 
 interface Song {
     name: string;
     bpm: number;
     id: number;
-    notes: Uint32Array;
+    //Returns an array of byte32 strings
+    notes: string[];
     isDeleted: boolean;
     isMinted: boolean;
 }
@@ -50,6 +52,12 @@ const mapArrToSong = (arr: any[]): Song => {
     return song as Song;
 };
 
+interface NotesTracker {
+    oldNotes: string;
+    //currentNotes is oldNotes + whatever is added
+    currentNotes: string;
+}
+
 const Song: NextPage = () => {
     const context = useAppContext();
     const router = useRouter();
@@ -64,27 +72,40 @@ const Song: NextPage = () => {
             if (context.contract && id !== undefined) {
                 const dataResult = await context.contract.getSongFromId(id);
                 //return a tuple with all of the struct elements
-                return mapArrToSong(dataResult);
+                const result = mapArrToSong(dataResult);
+                const musicNotes = getStringFromByteArray(result.notes);
+                setRawSongNotes(mus);
+                return result;
             }
         },
         { retry: 10, enabled: contractExists }
     );
-    const [rawSongNotes, setRawSongNotes] = React.useState<string>("");
+    const rawStringFromBytes = data ? getStringFromByteArray(data.notes) : "";
+    const [rawSongNotes, setRawSongNotes] = React.useState<string>(data ? rawStringFromBytes : "");
+    const [oldNotes, setOldNotes] = React.useState<string>(rawStringFromBytes);
 
-    const updateSongCallback = (notes: string[]) => {
-        //callback passed into the Playground to get the music notes
-        // setRawSongNotes(notes);
-        //do stuff
+    const updateSongCallback = (notes: string) => {
+        setRawSongNotes(notes);
     };
 
     const updateSong = async () => {
         const provider = context.provider;
         const signer = context.signer;
         const contract = context.contract;
-        if (provider && signer && contract) {
+        if (provider && signer && contract && data) {
             const contractWithSigner = contract.connect(signer);
+            const newNotes = createByteArrFromString(rawSongNotes.substring(data.notes.length));
 
-            const res = await contractWithSigner.addNotesToSong();
+            if (newNotes) {
+                console.log("new: ", newNotes);
+                const res = await contractWithSigner.addNotes(id, newNotes);
+
+                const updatedNotes = getStringFromByteArray(res);
+                setRawSongNotes(updatedNotes);
+                setOldNotes(updatedNotes);
+            } else {
+                toast("Uh oh, add some notes by typing something before you can commit");
+            }
         } else {
             console.error("Could not verify provider or signer or contract");
         }
@@ -104,6 +125,7 @@ const Song: NextPage = () => {
         );
     }
 
+    //TODO: sometimes this shows instead of loading, figure out what's going on
     if (!data) {
         return (
             <div className={styles.container}>
@@ -116,6 +138,7 @@ const Song: NextPage = () => {
             </div>
         );
     }
+
     return (
         <div className={styles.container}>
             <Head>
@@ -130,8 +153,20 @@ const Song: NextPage = () => {
                     <h1 className="text-xl font-bold">{data.name}</h1>
                     <h3>BPM: {data.bpm}</h3>
                 </div>
-                <Playground rawNotes={data.notes.join("")} updateSongCallback={updateSongCallback} bpm={data.bpm} />
-                <Button onClick={updateSong}>Add</Button>
+                {data.isDeleted ? (
+                    <p>This song was sadly deleted :(</p>
+                ) : (
+                    <>
+                        <Playground
+                            prevMusicNotes={oldNotes}
+                            rawNotes={rawSongNotes}
+                            updateSongCallback={updateSongCallback}
+                            bpm={data.bpm}
+                        />
+                        <Button onClick={updateSong}>Commit to the chain</Button>
+                    </>
+                )}
+                <Toaster />
                 <Footer />
             </main>
         </div>

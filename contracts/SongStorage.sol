@@ -71,7 +71,7 @@ contract SongStorage {
         return id;
     }
 
-    function _addNotesToSong(uint id, bytes32[] memory newNotes) internal {
+    function _addNotesToSong(uint id, bytes32[] memory newNotes) internal returns (bytes32[] memory) {
         //@notice ensure we're adding to a song that actually exists
         require(id < songs.length);
         //@notice for now, can only append 15 new notes at a time
@@ -88,10 +88,13 @@ contract SongStorage {
 
         emit SongEdited(currentSong.name, id);
 
+        return currentSong.notes;
+
     }
 
-    function addNotes(uint id, bytes32[] memory newNotes) public {
-        _addNotesToSong(id, newNotes);
+    //@notice returns the full new song notes
+    function addNotes(uint id, bytes32[] memory newNotes) public returns (bytes32[] memory) {
+        return _addNotesToSong(id, newNotes);
     }
 
     function deleteSong(uint id) onlySongOwner(id) public {

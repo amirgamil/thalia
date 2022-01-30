@@ -1,10 +1,12 @@
 import * as React from "react";
+import toast, { Toaster } from "react-hot-toast";
 import styled from "styled-components";
 
 interface Props {
     setValue: (val: string) => void;
     setIndividualNote: (val: string) => void;
     value: string;
+    uneditableText: string;
 }
 
 const Container = styled.div`
@@ -22,7 +24,6 @@ const Container = styled.div`
         -webkit-appearance: none;
         border: none;
         outline: none;
-        color: black;
         background: transparent;
         font-family: "Inconsolata", monospace;
         word-wrap: break-word;
@@ -34,28 +35,41 @@ const Container = styled.div`
         left: 0;
         bottom: 0;
         right: 0;
+        opacity: 0.5;
         overflow: hidden;
         resize: none;
         position: absolute;
     }
 
     pre {
+        color: black;
+    }
+
+    .hidden {
         visibility: hidden;
     }
 `;
 
-export const Textarea: React.FC<Props> = ({ value, setValue, setIndividualNote }) => {
+const notify = () =>
+    toast("Uh oh, you can't modify the hardwork of previous contributors (i.e. delete committed notes)!");
+
+export const Textarea: React.FC<Props> = ({ value, setValue, setIndividualNote, uneditableText }) => {
+    console.log("uneditable: ", uneditableText, " actual: ", value);
     return (
         <Container className="w-full relative my-4">
+            <pre>{uneditableText}</pre>
             <textarea
                 className="text-s"
                 placeholder="Start typing to build a tune"
                 value={value}
                 onKeyDown={(evt) => setIndividualNote(evt.key)}
                 onKeyUp={() => setIndividualNote("")}
-                onChange={(evt) => setValue(evt.target.value)}
+                onChange={(evt) =>
+                    evt.target.value.startsWith(uneditableText) ? setValue(evt.target.value) : notify()
+                }
             ></textarea>
-            <pre>{value}</pre>
+            <pre className="hidden">{value}</pre>
+            <Toaster />
         </Container>
     );
 };

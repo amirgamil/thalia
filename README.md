@@ -10,3 +10,4 @@ TODO
 -   [ ] Test adding to songs
 -   [ ] Cool UI as music plays
 -   [ ] UI to show previous music and what you can add to it
+-   [ ] Notice to turn sound on in browser

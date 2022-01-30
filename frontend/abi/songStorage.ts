@@ -42,7 +42,7 @@ export const songStorageABI = [
             { internalType: "bytes32[]", name: "newNotes", type: "bytes32[]" },
         ],
         name: "addNotes",
-        outputs: [],
+        outputs: [{ internalType: "bytes32[]", name: "", type: "bytes32[]" }],
         stateMutability: "nonpayable",
         type: "function",
     },
