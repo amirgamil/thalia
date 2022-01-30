@@ -10,7 +10,8 @@ import { useAppContext } from "../components/context";
 import { useQuery } from "react-query";
 import { useRouter } from "next/router";
 import toast, { Toaster } from "react-hot-toast";
-import { createByteArrFromString, getStringFromByteArray } from "../lib/uintHelpers";
+import { createByteArrFromString, getStringFromByteArray } from "../lib/byteArrHelpers";
+import { cloneDeep } from "lodash";
 
 interface Song {
     name: string;
@@ -52,7 +53,7 @@ const mapArrToSong = (arr: any[]): Song => {
     return song as Song;
 };
 
-interface NotesTracker {
+interface NotesRecord {
     oldNotes: string;
     //currentNotes is oldNotes + whatever is added
     currentNotes: string;
@@ -68,24 +69,29 @@ const Song: NextPage = () => {
     const { isLoading, error, data } = useQuery<Song | undefined>(
         "song",
         async () => {
-            console.log("contract: ", context.contract);
             if (context.contract && id !== undefined) {
                 const dataResult = await context.contract.getSongFromId(id);
                 //return a tuple with all of the struct elements
                 const result = mapArrToSong(dataResult);
                 const musicNotes = getStringFromByteArray(result.notes);
-                setRawSongNotes(musicNotes);
+                setNotesRecord({ oldNotes: musicNotes, currentNotes: musicNotes });
                 return result;
             }
         },
         { retry: 10, enabled: contractExists }
     );
     const rawStringFromBytes = data ? getStringFromByteArray(data.notes) : "";
-    const [rawSongNotes, setRawSongNotes] = React.useState<string>(data ? rawStringFromBytes : "");
-    const [oldNotes, setOldNotes] = React.useState<string>(rawStringFromBytes);
+
+    //on load, user hasn't added anything and oldNotes = currentNotes
+    const [notesRecord, setNotesRecord] = React.useState<NotesRecord>(
+        data ? { oldNotes: rawStringFromBytes, currentNotes: rawStringFromBytes } : { oldNotes: "", currentNotes: "" }
+    );
+    const [isUpdating, setIsUpdating] = React.useState<boolean>(false);
 
     const updateSongCallback = (notes: string) => {
-        setRawSongNotes(notes);
+        const copyNotes = cloneDeep(notesRecord);
+        copyNotes.currentNotes = notes;
+        setNotesRecord(copyNotes);
     };
 
     const updateSong = async () => {
@@ -94,15 +100,18 @@ const Song: NextPage = () => {
         const contract = context.contract;
         if (provider && signer && contract && data) {
             const contractWithSigner = contract.connect(signer);
-            const newNotes = createByteArrFromString(rawSongNotes.substring(data.notes.length));
+            const newNotes = createByteArrFromString(notesRecord.currentNotes.substring(notesRecord.oldNotes.length));
 
             if (newNotes) {
-                console.log("new: ", newNotes);
-                const res = await contractWithSigner.addNotes(id, newNotes);
+                setIsUpdating(true);
+                const newUpdatedNotes = await contractWithSigner.addNotes(id, newNotes);
 
-                const updatedNotes = getStringFromByteArray(res);
-                setRawSongNotes(updatedNotes);
-                setOldNotes(updatedNotes);
+                console.log("finished request!");
+                const stringNewNotes = getStringFromByteArray(newUpdatedNotes);
+                console.log("finished parsing updated notes: ", stringNewNotes);
+
+                setNotesRecord({ oldNotes: stringNewNotes, currentNotes: stringNewNotes });
+                setIsUpdating(false);
             } else {
                 toast("Uh oh, add some notes by typing something before you can commit");
             }
@@ -158,8 +167,9 @@ const Song: NextPage = () => {
                 ) : (
                     <>
                         <Playground
-                            prevMusicNotes={oldNotes}
-                            rawNotes={rawSongNotes}
+                            isLoading={isLoading}
+                            prevMusicNotes={notesRecord.oldNotes}
+                            rawNotes={notesRecord.currentNotes}
                             updateSongCallback={updateSongCallback}
                             bpm={data.bpm}
                         />

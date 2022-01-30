@@ -28,9 +28,16 @@ interface Props {
     rawNotes: string;
     updateSongCallback: (newNotes: string) => void;
     prevMusicNotes: string;
+    isLoading: boolean;
 }
 
-export const Synthesizer: React.FC<Props> = ({ bpm, updateSongCallback, rawNotes, prevMusicNotes }: Props) => {
+export const Synthesizer: React.FC<Props> = ({
+    bpm,
+    updateSongCallback,
+    rawNotes,
+    prevMusicNotes,
+    isLoading,
+}: Props) => {
     const [notes, setNotes] = React.useState<Notes>(mapRawMusicToSteps(rawNotes));
     const [lastNote, setLastNote] = React.useState<NoteType[]>([]);
     const [resetFullTune, setResetFullTune] = React.useState<boolean>(false);
@@ -72,6 +79,7 @@ export const Synthesizer: React.FC<Props> = ({ bpm, updateSongCallback, rawNotes
     return (
         <Container>
             <Textarea
+                isLoading={isLoading}
                 uneditableText={prevMusicNotes}
                 setIndividualNote={playSingleNote}
                 value={rawMusic}

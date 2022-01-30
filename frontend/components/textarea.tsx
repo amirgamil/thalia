@@ -7,6 +7,7 @@ interface Props {
     setIndividualNote: (val: string) => void;
     value: string;
     uneditableText: string;
+    isLoading: boolean;
 }
 
 const Container = styled.div`
@@ -35,10 +36,20 @@ const Container = styled.div`
         left: 0;
         bottom: 0;
         right: 0;
-        opacity: 0.5;
         overflow: hidden;
         resize: none;
         position: absolute;
+    }
+
+    .loading {
+        opacity: 1;
+        transition: opacity 0.5s ease-in-out;
+        /* For testing */
+        color: green;
+    }
+
+    .processing {
+        opacity: 0.5;
     }
 
     pre {
@@ -53,13 +64,13 @@ const Container = styled.div`
 const notify = () =>
     toast("Uh oh, you can't modify the hardwork of previous contributors (i.e. delete committed notes)!");
 
-export const Textarea: React.FC<Props> = ({ value, setValue, setIndividualNote, uneditableText }) => {
+export const Textarea: React.FC<Props> = ({ value, setValue, setIndividualNote, uneditableText, isLoading }) => {
     console.log("uneditable: ", uneditableText, " actual: ", value);
     return (
         <Container className="w-full relative my-4">
             <pre>{uneditableText}</pre>
             <textarea
-                className="text-s"
+                className={`text-s ${isLoading ? "loading" : "processing"}`}
                 placeholder="Start typing to build a tune"
                 value={value}
                 onKeyDown={(evt) => setIndividualNote(evt.key)}
