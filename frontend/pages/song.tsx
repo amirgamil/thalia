@@ -74,7 +74,7 @@ const Song: NextPage = () => {
                 //return a tuple with all of the struct elements
                 const result = mapArrToSong(dataResult);
                 const musicNotes = getStringFromByteArray(result.notes);
-                setRawSongNotes(mus);
+                setRawSongNotes(musicNotes);
                 return result;
             }
         },
