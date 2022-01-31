@@ -12,4 +12,5 @@ TODO
 -   [x] UI to show previous music and what you can add to it
 -   [ ] Figure out loading from after committing to the chain to updating grey text to black
 -   [ ] Notice to turn sound on in browser
+-   [ ] Take you to song screen after song has been successfully created
 -   [ ] Add nice loading screens during stuff (e.g. committing transactions)

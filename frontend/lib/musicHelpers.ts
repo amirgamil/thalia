@@ -26,3 +26,5 @@ export const mapRawMusicToSteps = (rawMusic: string): Notes => {
 export const mapUintArrayToMusic = (music: Uint32Array) => {
     return mapRawMusicToSteps(music.join(""));
 };
+
+const mapNoteToOpacity = () => {};

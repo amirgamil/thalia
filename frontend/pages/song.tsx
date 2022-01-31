@@ -9,7 +9,7 @@ import { Button } from "../components/button";
 import { useAppContext } from "../components/context";
 import { useQuery } from "react-query";
 import { useRouter } from "next/router";
-import toast, { Toaster } from "react-hot-toast";
+import toast, { ToastBar, Toaster } from "react-hot-toast";
 import { createByteArrFromString, getStringFromByteArray } from "../lib/byteArrHelpers";
 import { cloneDeep } from "lodash";
 
@@ -59,12 +59,16 @@ interface NotesRecord {
     currentNotes: string;
 }
 
+const CHAIN_EXPLORER = "https://polygonscan.com/";
+
 const Song: NextPage = () => {
     const context = useAppContext();
     const router = useRouter();
     const { id } = router.query;
 
     const contractExists = context.contract !== undefined;
+
+    const [writeTxHash, setWriteTxHash] = React.useState<string | undefined>(undefined);
 
     const { isLoading, error, data } = useQuery<Song | undefined>(
         "song",
@@ -74,12 +78,22 @@ const Song: NextPage = () => {
                 //return a tuple with all of the struct elements
                 const result = mapArrToSong(dataResult);
                 const musicNotes = getStringFromByteArray(result.notes);
+
+                //new notes have been verified and committed on-chain (no longer in mempool);
+                if (notesRecord.currentNotes === musicNotes && writeTxHash) {
+                    setIsUpdating(false);
+                    setWriteTxHash(undefined);
+                    toast.success("Your notes are now part of the song!");
+                }
                 setNotesRecord({ oldNotes: musicNotes, currentNotes: musicNotes });
+
                 return result;
             }
         },
-        { retry: 10, enabled: contractExists }
+        { retry: 5, enabled: contractExists }
     );
+    console.log(isLoading, error, data);
+
     const rawStringFromBytes = data ? getStringFromByteArray(data.notes) : "";
 
     //on load, user hasn't added anything and oldNotes = currentNotes
@@ -104,29 +118,45 @@ const Song: NextPage = () => {
 
             if (newNotes) {
                 setIsUpdating(true);
-                const newUpdatedNotes = await contractWithSigner.addNotes(id, newNotes);
+                try {
+                    const txData = await contractWithSigner.addNotes(id, newNotes);
+                    setWriteTxHash(txData.hash);
 
-                console.log("finished request!");
-                const stringNewNotes = getStringFromByteArray(newUpdatedNotes);
-                console.log("finished parsing updated notes: ", stringNewNotes);
-
-                setNotesRecord({ oldNotes: stringNewNotes, currentNotes: stringNewNotes });
-                setIsUpdating(false);
+                    toast.custom(
+                        (t) => (
+                            <div
+                                className={`bg-white px-6 py-4 shadow-md ${
+                                    t.visible ? "animate-enter" : "animate-leave"
+                                }`}
+                            >
+                                Transaction broadcasted! View it{" "}
+                                <a className="underline" href={`${CHAIN_EXPLORER}dfd`}>
+                                    here
+                                </a>
+                            </div>
+                        ),
+                        { position: "top-center" }
+                    );
+                } catch (ex: unknown) {
+                    toast.error("Uh oh, an error occurred broadcasting the transaction :(", {
+                        position: "top-center",
+                    });
+                    setIsUpdating(false);
+                }
             } else {
-                toast("Uh oh, add some notes by typing something before you can commit");
+                toast("Uh oh, add some notes by typing something before you can commit", { position: "top-center" });
             }
         } else {
             console.error("Could not verify provider or signer or contract");
         }
     };
 
-    //FIXME: prompt to sign in with wallet if not signed in instead of just showing loading screen
-    if (isLoading || !context.contract) {
+    if (error) {
         return (
             <div className={styles.container}>
                 <main className={styles.main}>
                     <div className="w-full h-full flex items-center justify-center">
-                        <p className="opacity-50">loading...</p>
+                        <p className="opacity-50">A song is waiting to be created here...</p>
                     </div>
                     <Footer />
                 </main>
@@ -134,13 +164,13 @@ const Song: NextPage = () => {
         );
     }
 
-    //TODO: sometimes this shows instead of loading, figure out what's going on
-    if (!data) {
+    //FIXME: prompt to sign in with wallet if not signed in instead of just showing loading screen
+    if (isLoading || !context.contract || !data) {
         return (
             <div className={styles.container}>
                 <main className={styles.main}>
                     <div className="w-full h-full flex items-center justify-center">
-                        <p className="opacity-50">A song is waiting to be created here...</p>
+                        <p className="opacity-50">loading...</p>
                     </div>
                     <Footer />
                 </main>
@@ -167,7 +197,7 @@ const Song: NextPage = () => {
                 ) : (
                     <>
                         <Playground
-                            isLoading={isLoading}
+                            isLoading={isUpdating}
                             prevMusicNotes={notesRecord.oldNotes}
                             rawNotes={notesRecord.currentNotes}
                             updateSongCallback={updateSongCallback}

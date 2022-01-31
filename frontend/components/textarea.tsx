@@ -1,6 +1,6 @@
 import * as React from "react";
 import toast, { Toaster } from "react-hot-toast";
-import styled from "styled-components";
+import styled, { keyframes } from "styled-components";
 
 interface Props {
     setValue: (val: string) => void;
@@ -9,6 +9,18 @@ interface Props {
     uneditableText: string;
     isLoading: boolean;
 }
+
+const flicker = keyframes`
+    0% {
+        opacity: 0.5;
+    }
+    50% {
+        opacity: 0.1;
+    }
+    100% {
+        opacity: 0.5;
+    }
+`;
 
 const Container = styled.div`
     textarea,
@@ -42,10 +54,7 @@ const Container = styled.div`
     }
 
     .loading {
-        opacity: 1;
-        transition: opacity 0.5s ease-in-out;
-        /* For testing */
-        color: green;
+        animation: ${flicker} 3s infinite;
     }
 
     .processing {
@@ -54,6 +63,7 @@ const Container = styled.div`
 
     pre {
         color: black;
+        z-index: 3;
     }
 
     .hidden {
@@ -62,10 +72,12 @@ const Container = styled.div`
 `;
 
 const notify = () =>
-    toast("Uh oh, you can't modify the hardwork of previous contributors (i.e. delete committed notes)!");
+    toast("Uh oh, you can't modify the hardwork of previous contributors (i.e. delete committed notes)!", {
+        position: "bottom-right",
+    });
 
 export const Textarea: React.FC<Props> = ({ value, setValue, setIndividualNote, uneditableText, isLoading }) => {
-    console.log("uneditable: ", uneditableText, " actual: ", value);
+    console.log("loading: ", isLoading);
     return (
         <Container className="w-full relative my-4">
             <pre>{uneditableText}</pre>

@@ -54,6 +54,11 @@ export const Synthesizer: React.FC<Props> = ({
         }
     }, [resetFullTune]);
 
+    const convertBackground = (note: string) => {
+        const changeBackgroundEvery = bpm / 60;
+        const body = document.getElementsByTagName("body")[0];
+    };
+
     const convertMusicToSteps = (rawMusic: string) => {
         updateSongCallback(rawMusic);
         setNotes(mapRawMusicToSteps(rawMusic));
@@ -94,7 +99,7 @@ export const Synthesizer: React.FC<Props> = ({
             {/* Unmute */}
             <Song isPlaying={!resetFullTune} bpm={bpm} volume={3} isMuted={true}>
                 <Track steps={resetFullTune ? [] : notes.musicNotes} volume={0} pan={0} mute={false}>
-                    <Instrument type="synth" />
+                    <Instrument type="synth" oscillator={{ type: "sine" }} />
                 </Track>
             </Song>
         </Container>
