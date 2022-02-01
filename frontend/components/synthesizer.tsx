@@ -2,7 +2,7 @@ import { Song, Track, Instrument, StepNoteType, StepType, MidiNote } from "react
 import * as React from "react";
 import styled from "styled-components";
 import { Textarea } from "./textarea";
-import { getNoteFromLetter } from "../lib/musicMappings";
+import { getNoteFromLetter, memoizedNoteIndices, sortedLetters } from "../lib/musicMappings";
 import { mapRawMusicToSteps, Notes } from "../lib/musicHelpers";
 
 //FIXME: not ideal, copied from the reactronic types
@@ -42,6 +42,7 @@ export const Synthesizer: React.FC<Props> = ({
     const [lastNote, setLastNote] = React.useState<NoteType[]>([]);
     const [resetFullTune, setResetFullTune] = React.useState<boolean>(false);
     const [rawMusic, setRawMusic] = React.useState<string>(rawNotes);
+    const canvasRef = React.useRef<HTMLCanvasElement>();
 
     React.useEffect(() => {
         if (resetFullTune) {
@@ -98,10 +99,47 @@ export const Synthesizer: React.FC<Props> = ({
             </Song>
             {/* Unmute */}
             <Song isPlaying={!resetFullTune} bpm={bpm} volume={3} isMuted={true}>
-                <Track steps={resetFullTune ? [] : notes.musicNotes} volume={0} pan={0} mute={false}>
+                <Track
+                    steps={resetFullTune ? [] : notes.musicNotes}
+                    volume={0}
+                    pan={0}
+                    mute={false}
+                    onStepPlay={(notes, index) => {
+                        //assuming only one layer notes for now
+                        if (notes.length !== 0) {
+                            const currNote = notes[0].name;
+
+                            const orderIndex = memoizedNoteIndices.get(currNote);
+                            if (canvasRef.current) {
+                                const ctx = canvasRef.current.getContext("2d");
+                                if (currNote && ctx) {
+                                    //assumes no drum sounds?
+
+                                    //note compromised of two unique things, tone and pitch
+                                    //use those two variables to generate a corresponding shape at a unique position
+                                    const note = currNote.charAt(0);
+                                    const pitch = parseInt(currNote.charAt(1));
+
+                                    const xCoord = (pitch / 7) * window.innerWidth;
+                                    const yCoord =
+                                        ((note.toLowerCase().charCodeAt(0) - "a".toLowerCase().charCodeAt(0)) / 8) *
+                                            (window.innerHeight - 450) +
+                                        450;
+
+                                    ctx.beginPath();
+                                    ctx.beginPath();
+                                    ctx.strokeStyle = "black";
+                                    ctx.rect(xCoord, yCoord, 50, 50);
+                                    ctx.stroke();
+                                }
+                            }
+                        }
+                    }}
+                >
                     <Instrument type="synth" oscillator={{ type: "sine" }} />
                 </Track>
             </Song>
+            <canvas ref={canvasRef}></canvas>
         </Container>
     );
 };

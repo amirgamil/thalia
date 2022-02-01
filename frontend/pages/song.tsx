@@ -90,9 +90,8 @@ const Song: NextPage = () => {
                 return result;
             }
         },
-        { retry: 5, enabled: contractExists }
+        { retry: 10, enabled: contractExists }
     );
-    console.log(isLoading, error, data);
 
     const rawStringFromBytes = data ? getStringFromByteArray(data.notes) : "";
 
@@ -130,7 +129,7 @@ const Song: NextPage = () => {
                                 }`}
                             >
                                 Transaction broadcasted! View it{" "}
-                                <a className="underline" href={`${CHAIN_EXPLORER}dfd`}>
+                                <a className="underline" href={`${CHAIN_EXPLORER}/${txData.hash}`}>
                                     here
                                 </a>
                             </div>
@@ -150,6 +149,8 @@ const Song: NextPage = () => {
             console.error("Could not verify provider or signer or contract");
         }
     };
+
+    console.log(isLoading, error, data);
 
     if (error) {
         return (
