@@ -79,11 +79,9 @@ export const Synthesizer: React.FC<Props> = ({
     React.useEffect(() => {
         const canvas: any = document.getElementById("shapeshifter");
         if (canvas) {
-            let style_height = +getComputedStyle(canvas).getPropertyValue("height").slice(0, -2);
             //get CSS width
             let style_width = +getComputedStyle(canvas).getPropertyValue("width").slice(0, -2);
             //scale the canvas
-            canvas.setAttribute("height", style_height * window.devicePixelRatio);
             canvas.setAttribute("width", style_width * window.devicePixelRatio);
         }
     });
@@ -157,6 +155,7 @@ export const Synthesizer: React.FC<Props> = ({
                                 const pitch = parseInt(currNote.charAt(1));
 
                                 const xCoord = Math.round((pitch / 7) * window.innerWidth);
+                                //FIXME: height range needs to be fixed here
                                 const yCoord = Math.round(
                                     ((note.toLowerCase().charCodeAt(0) - "a".toLowerCase().charCodeAt(0)) / 8) *
                                         window.innerHeight *
@@ -200,7 +199,12 @@ export const Synthesizer: React.FC<Props> = ({
                     <Instrument type="synth" oscillator={{ type: "sine" }} />
                 </Track>
             </Song>
-            <canvas id="shapeshifter" style={{ width: "100%", height: "100%", zIndex: 0 }} ref={canvasRef}></canvas>
+            <canvas
+                id="shapeshifter"
+                height="400"
+                style={{ width: "100%", position: "relative", zIndex: 0 }}
+                ref={canvasRef}
+            ></canvas>
         </Container>
     );
 };

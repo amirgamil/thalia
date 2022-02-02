@@ -150,8 +150,6 @@ const Song: NextPage = () => {
         }
     };
 
-    console.log(isLoading, error, data);
-
     if (error) {
         return (
             <div className={styles.container}>

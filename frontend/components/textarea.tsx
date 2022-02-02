@@ -26,7 +26,6 @@ const Container = styled.div`
     z-index: 40;
     textarea,
     pre {
-        box-sizing: border-box;
         width: 100%;
         border: 0px;
         padding: 10px 15px 10px 0;
@@ -69,6 +68,7 @@ const Container = styled.div`
 
     .hidden {
         visibility: hidden;
+        display: block;
     }
 `;
 
@@ -93,7 +93,7 @@ export const Textarea: React.FC<Props> = ({ value, setValue, setIndividualNote, 
                     evt.target.value.startsWith(uneditableText) ? setValue(evt.target.value) : notify()
                 }
             ></textarea>
-            <pre className="hidden">{value}</pre>
+            <div className="hidden">{value}</div>
             <Toaster />
         </Container>
     );

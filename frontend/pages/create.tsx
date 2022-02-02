@@ -105,6 +105,7 @@ const Create: NextPage = () => {
                     />
                 </div>
                 <Playground
+                    isLoading={false}
                     prevMusicNotes={""}
                     rawNotes={rawSongNotes}
                     updateSongCallback={updateSongCallback}

@@ -17,7 +17,7 @@ export const Playground: React.FC<Props> = ({
     isLoading,
 }: Props) => {
     return (
-        <div className="rounded-md w-full h-full">
+        <div className="rounded-md w-full">
             <Synthesizer
                 isLoading={isLoading}
                 prevMusicNotes={prevMusicNotes}

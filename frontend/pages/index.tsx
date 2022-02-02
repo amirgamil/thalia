@@ -26,7 +26,9 @@ const Home: NextPage = () => {
             <main className={styles.main}>
                 <div className="py-4">
                     <h1 className="text-xl font-bold">Thalia.</h1>
-                    <p className="text-xs opacity-50">A piano for the people, by the people.</p>
+                    <p className="text-xs opacity-50">
+                        Tell stories with sound, text, and shapes all at once. Oh and it's on-chain.
+                    </p>
                 </div>
                 <p className="opacity">
                     <strong>On-chain music composition</strong>.<br></br>Compose tunes with anyone and everyone{" "}
@@ -39,8 +41,10 @@ const Home: NextPage = () => {
                     rawNotes={rawNotes}
                     bpm={140}
                 />
-                <Button onClick={(evt) => console.log("TODO")}>Make this song!</Button>
-                <Footer />
+                <div className="relative mt-auto pb-5">
+                    <Button onClick={(evt) => console.log("TODO")}>Make this song!</Button>
+                    <Footer />
+                </div>
             </main>
         </div>
     );
