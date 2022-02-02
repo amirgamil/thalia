@@ -18,7 +18,7 @@ export const Nav = () => {
     };
 
     return (
-        <div className="relative w-full opacity-50">
+        <div className="relative w-full opacity-50 z-40">
             <div className="relative w-full pt-8 h-26 flex text-white">
                 <div className="ml-auto my-auto mr-16">
                     <Container>

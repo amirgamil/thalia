@@ -6,6 +6,7 @@ import { getNoteFromLetter, lettersToNotesMap, memoizedNoteIndices, sortedLetter
 import { mapRawMusicToSteps, Notes } from "../lib/musicHelpers";
 import { useInterval } from "../hooks/useInterval";
 import { cloneDeep } from "lodash";
+import { pastelColors } from "../lib/colors";
 
 //FIXME: not ideal, copied from the reactronic types
 type NoteType = {
@@ -39,12 +40,16 @@ interface MusicalShape {
     shape: string;
     //assume all rectangles for now
     width: number;
-    hide: boolean;
     height: number;
-    //time before fading
+    note: string;
     delta: number;
 }
-type callback = () => void;
+
+interface LastHighlightPosition {
+    x: number;
+    y: number;
+}
+
 export const Synthesizer: React.FC<Props> = ({
     bpm,
     updateSongCallback,
@@ -57,7 +62,9 @@ export const Synthesizer: React.FC<Props> = ({
     const [resetFullTune, setResetFullTune] = React.useState<boolean>(false);
     const [rawMusic, setRawMusic] = React.useState<string>(rawNotes);
     const canvasRef = React.useRef<HTMLCanvasElement>(null);
-    const canvasElements = React.useRef<MusicalShape[]>([]);
+    const lastShapeNote = React.useRef<MusicalShape>();
+    const storedColors = React.useRef<string[]>([]);
+    const lastPosition = React.useRef<LastHighlightPosition>();
 
     React.useEffect(() => {
         if (resetFullTune) {
@@ -69,13 +76,17 @@ export const Synthesizer: React.FC<Props> = ({
             };
         }
     }, [resetFullTune, rawMusic]);
-
-    const updateCanvasDrawing = () => {};
-
-    const convertBackground = (note: string) => {
-        const changeBackgroundEvery = bpm / 60;
-        const body = document.getElementsByTagName("body")[0];
-    };
+    React.useEffect(() => {
+        const canvas: any = document.getElementById("shapeshifter");
+        if (canvas) {
+            let style_height = +getComputedStyle(canvas).getPropertyValue("height").slice(0, -2);
+            //get CSS width
+            let style_width = +getComputedStyle(canvas).getPropertyValue("width").slice(0, -2);
+            //scale the canvas
+            canvas.setAttribute("height", style_height * window.devicePixelRatio);
+            canvas.setAttribute("width", style_width * window.devicePixelRatio);
+        }
+    });
 
     const convertMusicToSteps = (rawMusic: string) => {
         updateSongCallback(rawMusic);
@@ -122,55 +133,78 @@ export const Synthesizer: React.FC<Props> = ({
                     pan={0}
                     mute={false}
                     onStepPlay={(note, index) => {
+                        if (!canvasRef.current) return;
+                        const ctx = canvasRef.current.getContext("2d");
+                        if (!ctx) return;
+                        if (!window) return;
+
+                        if (lastShapeNote.current) {
+                            //leave trace
+                            ctx.clearRect(
+                                lastShapeNote.current.xCoord + 1,
+                                lastShapeNote.current.yCoord + 1,
+                                lastShapeNote.current.width - 2,
+                                lastShapeNote.current.height - 2
+                            );
+                            ctx.beginPath();
+                        }
                         if (note.length !== 0) {
                             const currNote = note[0].name;
                             if (currNote) {
                                 //note compromised of two unique things, tone and pitch
                                 //use those two variables to generate a corresponding shape at a unique position
-
                                 const note = currNote.charAt(0);
                                 const pitch = parseInt(currNote.charAt(1));
 
-                                const xCoord = (pitch / 7) * 500;
-                                const yCoord =
-                                    ((note.toLowerCase().charCodeAt(0) - "a".toLowerCase().charCodeAt(0)) / 8) * 500;
-
-                                if (!canvasRef.current) return;
-                                const ctx = canvasRef.current.getContext("2d");
-                                if (!ctx) return;
-                                ctx.clearRect(shape.xCoord - 1, shape.yCoord - 1, shape.width + 2, shape.height + 2);
+                                const xCoord = Math.round((pitch / 7) * window.innerWidth);
+                                const yCoord = Math.round(
+                                    ((note.toLowerCase().charCodeAt(0) - "a".toLowerCase().charCodeAt(0)) / 8) *
+                                        window.innerHeight *
+                                        0.5
+                                );
+                                const shapeNote = {
+                                    xCoord,
+                                    yCoord,
+                                    shape: "rectangle",
+                                    width: 50,
+                                    height: 50,
+                                    delta: 0,
+                                    note,
+                                };
                                 ctx.beginPath();
-                                ctx.fillStyle = "black";
-                                ctx.fillRect(shape.xCoord, shape.yCoord, shape.width, shape.height);
-                                ctx.stroke();
-                                shape.hide = true;
-                                if (index < canvasElements.current.length) {
-                                    canvasElements.current[index].hide = false;
+
+                                if (storedColors.current[index]) {
+                                    ctx.fillStyle = storedColors.current[index];
                                 } else {
-                                    canvasElements.current.push({
-                                        xCoord,
-                                        yCoord,
-                                        shape: "rectangle",
-                                        width: 50,
-                                        height: 50,
-                                        delta: 0,
-                                        hide: false,
-                                    });
+                                    const curr = pastelColors();
+                                    ctx.fillStyle = curr;
+                                    storedColors.current.push(curr);
                                 }
+
+                                if (
+                                    index !== 0 &&
+                                    lastShapeNote.current &&
+                                    shapeNote.note === lastShapeNote.current.note
+                                ) {
+                                    shapeNote.width = shapeNote.width + lastShapeNote.current.delta;
+                                    shapeNote.height = shapeNote.height + lastShapeNote.current.delta;
+                                    shapeNote.delta = lastShapeNote.current.delta + 5;
+                                }
+                                ctx.fillRect(shapeNote.xCoord, shapeNote.yCoord, shapeNote.width, shapeNote.height);
+                                ctx.stroke();
+                                lastShapeNote.current = shapeNote;
                             }
                         }
-                        console.log(canvasElements.current.length);
-                        updateCanvasDrawing();
                     }}
                 >
                     <Instrument type="synth" oscillator={{ type: "sine" }} />
                 </Track>
             </Song>
-            <canvas width={500} height={500} ref={canvasRef}></canvas>
+            <canvas id="shapeshifter" style={{ width: "100%", height: "100%", zIndex: 0 }} ref={canvasRef}></canvas>
         </Container>
     );
 };
 
 export const NotesDisplay: React.FC<{ notes: string[] }> = ({ notes }) => {
-    return <p>{notes.join(" ")}</p>;
+    return <p className="opacity-60">Notes: {notes.join(" ")}</p>;
 };

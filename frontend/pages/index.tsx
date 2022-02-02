@@ -32,7 +32,13 @@ const Home: NextPage = () => {
                     <strong>On-chain music composition</strong>.<br></br>Compose tunes with anyone and everyone{" "}
                     <strong>straight from your keyboard</strong>.
                 </p>
-                <Playground prevMusicNotes={""} updateSongCallback={updateSongCallback} rawNotes={rawNotes} bpm={140} />
+                <Playground
+                    isLoading={false}
+                    prevMusicNotes={""}
+                    updateSongCallback={updateSongCallback}
+                    rawNotes={rawNotes}
+                    bpm={140}
+                />
                 <Button onClick={(evt) => console.log("TODO")}>Make this song!</Button>
                 <Footer />
             </main>

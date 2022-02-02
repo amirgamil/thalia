@@ -17,7 +17,7 @@ interface Props {
 
 export const Button: React.FC<Props> = ({ onClick, children }: Props) => {
     return (
-        <Container className="my-10 w-full flex justify-center">
+        <Container className="my-10 w-full flex justify-center z-40">
             <button onClick={onClick} className="border p-3">
                 {children}
             </button>

@@ -23,6 +23,7 @@ const flicker = keyframes`
 `;
 
 const Container = styled.div`
+    z-index: 40;
     textarea,
     pre {
         box-sizing: border-box;
@@ -82,6 +83,7 @@ export const Textarea: React.FC<Props> = ({ value, setValue, setIndividualNote, 
         <Container className="w-full relative my-4">
             <pre>{uneditableText}</pre>
             <textarea
+                id="textarea"
                 className={`text-s ${isLoading ? "loading" : "processing"}`}
                 placeholder="Start typing to build a tune"
                 value={value}
