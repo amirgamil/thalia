@@ -45,7 +45,7 @@ const Home: NextPage = () => {
                 <div className="py-4">
                     <h1 className="text-xl font-bold">🎵 Thalia Playground</h1>
                     <p className="text-xs opacity-50">
-                        Tell stories with sound, text, and shapes all at once. Oh and it's all on-chain.
+                        Tell stories with sound, text, and shapes all at once. Oh and it&apos;s all on-chain.
                     </p>
                 </div>
                 <p>

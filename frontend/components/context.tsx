@@ -60,7 +60,7 @@ export const AppContextProvider = (props: any) => {
 
         const address = await signer.getAddress();
         setAddress(address);
-    }, [setProvider]);
+    }, [setProvider, deployedContractAddress]);
 
     React.useEffect(() => {
         if (web3Modal.cachedProvider) {

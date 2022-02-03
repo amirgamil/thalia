@@ -92,10 +92,10 @@ export const CreateSong: React.FC<{ notes?: string; defaultBPM?: string }> = ({
             <Nav />
             <main className={styles.main}>
                 <div className="py-4">
-                    <h1 className="text-xl font-bold">It's only you and the music.</h1>
+                    <h1 className="text-xl font-bold">It &apos;s only you and the music.</h1>
                     <p className="text-s opacity-70">
                         Create a song.<br></br>Write some notes.<br></br>Commit them to the blockchain.<br></br>Now
-                        anyone can add to this song.<br></br>I can't wait to see to what you create.
+                        anyone can add to this song.<br></br>I can&apos;t wait to see to what you create.
                     </p>
                 </div>
                 <div className="flex flex-col">
