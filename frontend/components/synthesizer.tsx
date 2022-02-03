@@ -2,10 +2,8 @@ import { Song, Track, Instrument, StepNoteType, StepType, MidiNote } from "react
 import * as React from "react";
 import styled from "styled-components";
 import { Textarea } from "./textarea";
-import { getNoteFromLetter, lettersToNotesMap, memoizedNoteIndices, sortedLetters } from "../lib/musicMappings";
+import { getNoteFromLetter } from "../lib/musicMappings";
 import { mapRawMusicToSteps, Notes } from "../lib/musicHelpers";
-import { useInterval } from "../hooks/useInterval";
-import { cloneDeep } from "lodash";
 import { pastelColors } from "../lib/colors";
 
 //FIXME: not ideal, copied from the reactronic types

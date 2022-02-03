@@ -27,4 +27,42 @@ export const mapUintArrayToMusic = (music: Uint32Array) => {
     return mapRawMusicToSteps(music.join(""));
 };
 
-const mapNoteToOpacity = () => {};
+export interface Song {
+    name: string;
+    bpm: number;
+    id: number;
+    //Returns an array of byte32 strings
+    notes: string[];
+    isDeleted: boolean;
+    isMinted: boolean;
+}
+
+export const mapArrToSong = (arr: any[]): Song => {
+    const song: any = {};
+
+    if (typeof arr[0] === "string") {
+        song.name = arr[0];
+    }
+
+    if (typeof arr[1] === "boolean") {
+        song.isMinted = arr[1];
+    }
+
+    if (typeof arr[2] === "boolean") {
+        song.isDeleted = arr[2];
+    }
+
+    if (Array.isArray(arr[3])) {
+        song.notes = arr[3];
+    }
+
+    if (typeof arr[4] === "number") {
+        song.id = arr[4];
+    }
+
+    if (typeof arr[5] === "number") {
+        song.bpm = arr[5];
+    }
+
+    return song as Song;
+};

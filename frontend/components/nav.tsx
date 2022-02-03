@@ -24,10 +24,7 @@ export const Nav = () => {
                     <Container>
                         {context.address && (
                             <>
-                                <Link href={`/tune?id=`}>
-                                    <button className="button secondary mr-4">Find Tune</button>
-                                </Link>
-                                <Link href={`/explore`}>
+                                <Link href={`/find`}>
                                     <button className="button secondary mr-4">Explore</button>
                                 </Link>
                                 <Link href={`/create`}>
