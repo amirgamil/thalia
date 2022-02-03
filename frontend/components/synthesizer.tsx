@@ -120,7 +120,7 @@ export const Synthesizer: React.FC<Props> = ({
                 </Track>
             </Song>
             {/* Unmute */}
-            <Song isPlaying={!resetFullTune} bpm={bpm} volume={3} isMuted={true}>
+            <Song isPlaying={!resetFullTune} bpm={bpm} volume={3} isMuted={false}>
                 <Track
                     steps={resetFullTune ? [] : notes.musicNotes}
                     volume={3}
