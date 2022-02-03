@@ -46,7 +46,7 @@ export const AppContextProvider = (props: any) => {
     const [address, setAddress] = React.useState<string | undefined>(undefined);
     const [contract, setContract] = React.useState<ethers.Contract | undefined>(undefined);
 
-    const deployedContractAddress = React.useMemo(() => "0x5FbDB2315678afecb367f032d93F642f64180aa3", []);
+    const deployedContractAddress = React.useMemo(() => process.env.CONTRACT_ADDRESS, []);
 
     const loadWeb3Modal = React.useCallback(async () => {
         const provider = new ethers.providers.Web3Provider(await web3Modal.connect(), "any");
