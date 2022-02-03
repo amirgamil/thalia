@@ -1,14 +1,17 @@
 # Thalia
 
-On-chain music composition
+This project is an experiment at on-chain music composition. It's an append-only interface for composing music together and telling visual stories with your music, straight from your keyboard.
+
+### How it works
+
+My implementation is surprisingly simple! Songs which are added live on-chain. The raw keyboard letters (the one you see as you type) are stored as an array of bytes (which is more gas-optimized than an arbitrary length string!), as well as their corresponding data on-chain. These letters are then mapped to corresponding notes, (i.e. synthesized) in the client, where we store an array that maps letters to their corresponding notes. Technically, this could also be stored on-chain, but I wanted to keep gas costs low, so the logic moved to the client.
 
 TODO
 
 -   [ ] Add fuzzing to tests
--   [ ] Look into casting whether it will cost more gas (estimateGas)
 -   [ ] Mint resulting song into an NFT
 -   [x] Test adding to songs
--   [ ] Cool UI as music plays
+-   [x] Cool UI as music plays
 -   [x] UI to show previous music and what you can add to it
 -   [x] Figure out loading from after committing to the chain to updating grey text to black
 -   [ ] Notice to turn sound on in browser

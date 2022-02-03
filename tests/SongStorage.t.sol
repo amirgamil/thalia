@@ -122,8 +122,8 @@ contract ContractTest is DSTest {
 
     function testAddLargeTuneInBounds() public {
         uint newId = songStorage.createNewSong("another new song", 130);
-        bytes32[] memory tooManyNotes = new bytes32[](12);
-        for (uint i = 0; i < 11; i++) {
+        bytes32[] memory tooManyNotes = new bytes32[](46);
+        for (uint i = 0; i < 45; i++) {
             tooManyNotes[i] = "A";
         }
 
@@ -132,8 +132,8 @@ contract ContractTest is DSTest {
 
     function testFailAddToLargeATune() public {
         uint newId = songStorage.createNewSong("another new song", 130);
-        bytes32[] memory tooManyNotes = new bytes32[](17);
-        for (uint i = 0; i < 16; i++) {
+        bytes32[] memory tooManyNotes = new bytes32[](52);
+        for (uint i = 0; i < 51; i++) {
             tooManyNotes[i] = "A";
         }
 

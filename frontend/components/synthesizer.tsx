@@ -1,10 +1,9 @@
-import { Song, Track, Instrument, StepNoteType, StepType, MidiNote } from "reactronica";
+import { Song, Track, Instrument, StepNoteType } from "reactronica";
 import * as React from "react";
 import styled from "styled-components";
 import { Textarea } from "./textarea";
-import { getNoteFromLetter } from "../lib/musicMappings";
+import { getNoteFromLetter, memoizedNoteIndices } from "../lib/musicMappings";
 import { mapRawMusicToSteps, Notes } from "../lib/musicHelpers";
-import { pastelColors } from "../lib/colors";
 
 //FIXME: not ideal, copied from the reactronic types
 type NoteType = {
@@ -61,14 +60,13 @@ export const Synthesizer: React.FC<Props> = ({
     const [rawMusic, setRawMusic] = React.useState<string>(rawNotes);
     const canvasRef = React.useRef<HTMLCanvasElement>(null);
     const lastShapeNote = React.useRef<MusicalShape>();
-    const storedColors = React.useRef<string[]>([]);
     const lastPosition = React.useRef<LastHighlightPosition>();
 
     React.useEffect(() => {
         if (resetFullTune) {
             const restart = setTimeout(() => {
                 setResetFullTune(false);
-            }, 3000);
+            }, 2000);
             return () => {
                 clearTimeout(restart);
             };
@@ -125,7 +123,7 @@ export const Synthesizer: React.FC<Props> = ({
             <Song isPlaying={!resetFullTune} bpm={bpm} volume={3} isMuted={true}>
                 <Track
                     steps={resetFullTune ? [] : notes.musicNotes}
-                    volume={0}
+                    volume={3}
                     pan={0}
                     mute={false}
                     onStepPlay={(note, index) => {
@@ -147,18 +145,13 @@ export const Synthesizer: React.FC<Props> = ({
                         if (note.length !== 0) {
                             const currNote = note[0].name;
                             if (currNote) {
-                                //note compromised of two unique things, tone and pitch
-                                //use those two variables to generate a corresponding shape at a unique position
-                                const note = currNote.charAt(0);
-                                const pitch = parseInt(currNote.charAt(1));
+                                const noteIndex = memoizedNoteIndices.get(currNote);
+                                if (!noteIndex) return;
 
-                                const xCoord = Math.round((pitch / 7) * window.innerWidth);
-                                //FIXME: height range needs to be fixed here
-                                const yCoord = Math.round(
-                                    ((note.toLowerCase().charCodeAt(0) - "a".toLowerCase().charCodeAt(0)) / 8) *
-                                        window.innerHeight *
-                                        0.5
-                                );
+                                const tone = currNote.charAt(0);
+                                const xCoord = Math.floor(noteIndex / (window.innerWidth / 50)) * 50;
+                                const yCoord = Math.floor(noteIndex % (400 / 50)) * 50;
+
                                 const shapeNote = {
                                     xCoord,
                                     yCoord,
@@ -166,17 +159,11 @@ export const Synthesizer: React.FC<Props> = ({
                                     width: 50,
                                     height: 50,
                                     delta: 0,
-                                    note,
+                                    note: tone,
                                 };
                                 ctx.beginPath();
 
-                                if (storedColors.current[index]) {
-                                    ctx.fillStyle = storedColors.current[index];
-                                } else {
-                                    const curr = pastelColors();
-                                    ctx.fillStyle = curr;
-                                    storedColors.current.push(curr);
-                                }
+                                ctx.fillStyle = "black";
 
                                 if (
                                     index !== 0 &&

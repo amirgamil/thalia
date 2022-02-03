@@ -69,6 +69,39 @@ const SongPage: NextPage = () => {
         setNotesRecord(copyNotes);
     };
 
+    const deleteSong = async () => {
+        const provider = context.provider;
+        const signer = context.signer;
+        const contract = context.contract;
+        if (provider && signer && contract) {
+            const contractWithSigner = contract.connect(signer);
+            setIsUpdating(true);
+            try {
+                const txData = await contractWithSigner.deleteSong(id);
+                broadcastTransaction(txData.hash);
+            } catch (ex: unknown) {
+                toast.error("Uh oh, an error occurred broadcasting the transaction :(", {
+                    position: "top-center",
+                });
+                setIsUpdating(false);
+            }
+        }
+    };
+
+    const broadcastTransaction = (hash: string) => {
+        toast.custom(
+            (t) => (
+                <div className={`bg-white px-6 py-4 shadow-md ${t.visible ? "animate-enter" : "animate-leave"}`}>
+                    Transaction broadcasted! View it{" "}
+                    <a className="underline" href={`${CHAIN_EXPLORER}/${hash}`}>
+                        here
+                    </a>
+                </div>
+            ),
+            { position: "top-center" }
+        );
+    };
+
     const updateSong = async () => {
         const provider = context.provider;
         const signer = context.signer;
@@ -82,22 +115,7 @@ const SongPage: NextPage = () => {
                 try {
                     const txData = await contractWithSigner.addNotes(id, newNotes);
                     setWriteTxHash(txData.hash);
-
-                    toast.custom(
-                        (t) => (
-                            <div
-                                className={`bg-white px-6 py-4 shadow-md ${
-                                    t.visible ? "animate-enter" : "animate-leave"
-                                }`}
-                            >
-                                Transaction broadcasted! View it{" "}
-                                <a className="underline" href={`${CHAIN_EXPLORER}/${txData.hash}`}>
-                                    here
-                                </a>
-                            </div>
-                        ),
-                        { position: "top-center" }
-                    );
+                    broadcastTransaction(txData.hash);
                 } catch (ex: unknown) {
                     toast.error("Uh oh, an error occurred broadcasting the transaction :(", {
                         position: "top-center",
@@ -164,7 +182,10 @@ const SongPage: NextPage = () => {
                             updateSongCallback={updateSongCallback}
                             bpm={data.bpm}
                         />
-                        <Button onClick={updateSong}>Commit to the chain</Button>
+                        <div className="flex">
+                            <Button onClick={updateSong}>Commit to the chain</Button>
+                            <Button onClick={deleteSong}>Delete (you must be the owner!)</Button>
+                        </div>
                     </>
                 )}
                 <Toaster />

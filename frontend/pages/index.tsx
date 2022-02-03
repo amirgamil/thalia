@@ -6,12 +6,30 @@ import styles from "../styles/Home.module.css";
 import { Nav } from "../components/nav";
 import { Footer } from "../components/footer";
 import { Button } from "../components/button";
+import toast, { Toaster } from "react-hot-toast";
+import { useRouter } from "next/router";
 
 const Home: NextPage = () => {
     const [rawNotes, setRawNotes] = React.useState<string>("");
+    const router = useRouter();
 
     const updateSongCallback = (newNotes: string) => {
         setRawNotes(newNotes);
+    };
+
+    const prepareToMakeSong = () => {
+        if (navigator && navigator.clipboard && navigator.clipboard.writeText) {
+            navigator.clipboard.writeText(rawNotes);
+            toast(
+                "Your song has been copied to your clipboard! You'll be redirected to the create page, paste the result there",
+                {
+                    duration: 4000,
+                }
+            );
+            setTimeout(() => {
+                router.push("/create");
+            }, 4000);
+        }
     };
 
     return (
@@ -25,12 +43,12 @@ const Home: NextPage = () => {
             <Nav />
             <main className={styles.main}>
                 <div className="py-4">
-                    <h1 className="text-xl font-bold">Thalia.</h1>
+                    <h1 className="text-xl font-bold">🎵 Thalia Playground</h1>
                     <p className="text-xs opacity-50">
-                        Tell stories with sound, text, and shapes all at once. Oh and it's on-chain.
+                        Tell stories with sound, text, and shapes all at once. Oh and it's all on-chain.
                     </p>
                 </div>
-                <p className="opacity">
+                <p>
                     <strong>On-chain music composition</strong>.<br></br>Compose tunes with anyone and everyone{" "}
                     <strong>straight from your keyboard</strong>.
                 </p>
@@ -39,12 +57,13 @@ const Home: NextPage = () => {
                     prevMusicNotes={""}
                     updateSongCallback={updateSongCallback}
                     rawNotes={rawNotes}
-                    bpm={140}
+                    bpm={150}
                 />
                 <div className="relative mt-auto pb-5">
-                    <Button onClick={(evt) => console.log("TODO")}>Make this song!</Button>
+                    <Button onClick={(evt) => prepareToMakeSong()}>Make this song!</Button>
                     <Footer />
                 </div>
+                <Toaster />
             </main>
         </div>
     );

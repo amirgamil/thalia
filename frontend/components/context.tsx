@@ -22,7 +22,6 @@ export const AppContext = React.createContext<Context>({
     contract: undefined,
     address: "",
 });
-
 let web3Modal: Web3Modal;
 if (typeof window !== "undefined") {
     web3Modal = new Web3Modal({
@@ -33,7 +32,7 @@ if (typeof window !== "undefined") {
                 package: WalletConnectProvider,
                 options: {
                     rpc: {
-                        1: `https://polygon-mumbai.g.alchemy.com/v2/${process.env.ALCHEMY_API_KEY}`,
+                        1: `https://eth-ropsten.alchemyapi.io/v2/${process.env.ALCHEMY_API_KEY}`,
                     },
                 },
             },

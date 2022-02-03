@@ -1,4 +1,3 @@
-import type { NextPage } from "next";
 import * as React from "react";
 import Head from "next/head";
 import { Playground } from "../components/playground";
@@ -8,14 +7,19 @@ import { Footer } from "../components/footer";
 import { Button } from "../components/button";
 import { useAppContext } from "../components/context";
 import toast, { Toaster } from "react-hot-toast";
-import { ethers } from "ethers";
 import { CHAIN_EXPLORER } from "../lib/defaults";
 import { createByteArrFromString } from "../lib/byteArrHelpers";
 
-const Create: NextPage = () => {
+export const CreateSong: React.FC<{ notes?: string; defaultBPM?: string }> = ({
+    notes,
+    defaultBPM,
+}: {
+    notes?: string;
+    defaultBPM?: string;
+}) => {
     const [name, setName] = React.useState<string>("");
-    const [bpm, setBpm] = React.useState<string>("");
-    const [rawSongNotes, setRawSongNotes] = React.useState<string>("");
+    const [bpm, setBpm] = React.useState<string>(defaultBPM ?? "");
+    const [rawSongNotes, setRawSongNotes] = React.useState<string>(notes ?? "");
     const context = useAppContext();
 
     const updateSongCallback = (notes: string) => {
@@ -73,6 +77,10 @@ const Create: NextPage = () => {
     };
 
     const numericBpm = parseInt(bpm) ? parseInt(bpm) : 110;
+    if (bpm && !parseInt(bpm)) {
+        toast("Uh oh, bpm should be a number!");
+    }
+
     return (
         <div className={styles.container}>
             <Head>
@@ -119,4 +127,4 @@ const Create: NextPage = () => {
     );
 };
 
-export default Create;
+export default CreateSong;

@@ -42,7 +42,7 @@ contract SongStorage {
     function _createSong(string memory _name, uint bpm) internal returns (uint) {
         uint32 newId = getNumberOfSongs();
         //@notice set limit on number of songs a person can create to prevent bots etc.
-        require(songOwnerCount[msg.sender] < 15);
+        require(songOwnerCount[msg.sender] < 50);
 
         songs.push(SharedDataStructures.Song({name: _name, isMinted: false, isDeleted: false, notes: new bytes32[](0), id: newId, bpm: uint32(bpm)}));
 
@@ -74,8 +74,8 @@ contract SongStorage {
     function _addNotesToSong(uint id, bytes32[] memory newNotes) internal returns (bytes32[] memory) {
         //@notice ensure we're adding to a song that actually exists
         require(id < songs.length);
-        //@notice for now, can only append 15 new notes at a time
-        require(newNotes.length < 15);
+        //@notice for now, can only append 50 new notes at a time
+        require(newNotes.length < 50);
 
         SharedDataStructures.Song storage currentSong = songs[id];
 
