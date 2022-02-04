@@ -92,7 +92,7 @@ const SongPage: NextPage = () => {
             (t) => (
                 <div className={`bg-white px-6 py-4 shadow-md ${t.visible ? "animate-enter" : "animate-leave"}`}>
                     Transaction broadcasted! View it{" "}
-                    <a className="underline" href={`${CHAIN_EXPLORER}/${hash}`}>
+                    <a className="underline" href={`${CHAIN_EXPLORER}${hash}`}>
                         here
                     </a>
                 </div>
