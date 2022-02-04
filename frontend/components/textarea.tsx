@@ -84,8 +84,8 @@ export const Textarea: React.FC<Props> = ({ value, setValue, setIndividualNote, 
             <pre>{uneditableText}</pre>
             <textarea
                 id="textarea"
-                className={`text-s ${isLoading ? "loading" : "processing"}`}
-                placeholder="Click here and start typing to make a tune, (make sure your sound is on)!"
+                className={`text-s z-2 ${isLoading ? "loading" : "processing"}`}
+                placeholder="Click here and start typing to make a tune (sound on)!"
                 value={value}
                 onKeyDown={(evt) => setIndividualNote(evt.key)}
                 onKeyUp={() => setIndividualNote("")}
