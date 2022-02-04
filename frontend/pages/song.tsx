@@ -14,14 +14,13 @@ import { createByteArrFromString, getStringFromByteArray } from "../lib/byteArrH
 import { cloneDeep } from "lodash";
 import { mapArrToSong, Song } from "../lib/musicHelpers";
 import { Spinner } from "../components/spinner";
+import { CHAIN_EXPLORER } from "../lib/defaults";
 
 interface NotesRecord {
     oldNotes: string;
     //currentNotes is oldNotes + whatever is added
     currentNotes: string;
 }
-
-const CHAIN_EXPLORER = "https://polygonscan.com/";
 
 const SongPage: NextPage = () => {
     const context = useAppContext();

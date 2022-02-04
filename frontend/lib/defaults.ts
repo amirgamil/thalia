@@ -1,1 +1,1 @@
-export const CHAIN_EXPLORER = "https://polygonscan.com/";
+export const CHAIN_EXPLORER = "https://ropsten.etherscan.io/";

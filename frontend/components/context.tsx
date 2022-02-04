@@ -27,16 +27,7 @@ if (typeof window !== "undefined") {
     web3Modal = new Web3Modal({
         network: process.env.NODE_ENV === "development" ? "31337" : "test", // change after deploy
         cacheProvider: true, // optional
-        providerOptions: {
-            walletconnect: {
-                package: WalletConnectProvider,
-                options: {
-                    rpc: {
-                        1: `https://eth-ropsten.alchemyapi.io/v2/zF59Mu2JyaVWMY0FkF0oBLkSnJrNj4IT`,
-                    },
-                },
-            },
-        },
+        providerOptions: {},
     });
 }
 
