@@ -52,7 +52,7 @@ export const CreateSong: React.FC<{ notes?: string; defaultBPM?: string }> = ({
             toast.custom(
                 (t) => (
                     <div className={`bg-white px-6 py-4 shadow-md ${t.visible ? "animate-enter" : "animate-leave"}`}>
-                        <a className="underline" href={`${CHAIN_EXPLORER}${res.hash}`}>
+                        <a className="underline" href={`${CHAIN_EXPLORER}tx/${res.hash}`}>
                             Transaction
                         </a>{" "}
                         broadcasted! If the Tx succeeds, it will live{" "}
