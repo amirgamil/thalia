@@ -61,7 +61,7 @@ export const CreateSong: React.FC<{ notes?: string; defaultBPM?: string }> = ({
                             href={
                                 process.env.NODE_ENV === "development"
                                     ? `http://localhost:3000/song?id=${id}`
-                                    : `http://`
+                                    : `https://ropstenthalia.vercel.app/song?id=${id}`
                             }
                         >
                             here
